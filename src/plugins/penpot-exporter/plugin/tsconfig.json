@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["ES2017"],
+    "strict": true,
+    "typeRoots": ["../node_modules/@figma"],
+    "moduleResolution": "Node",
+    "resolveJsonModule": true
+  }
+}

@@ -10,7 +10,13 @@
     "paths": {
       "@figpot/*": [
         "./*"
-      ]
+      ],
+      "@plugin/*": [
+        "./src/plugins/penpot-exporter/plugin/*"
+      ],
+      "@ui/*": [
+        "./src/plugins/penpot-exporter/ui/*"
+      ],
     },
     "typeRoots": [
       "node_modules/@types",
