@@ -1,5 +1,4 @@
 import { componentsLibrary } from '@plugin/ComponentLibrary';
-
 import { PenpotFile } from '@ui/lib/types/penpotFile';
 import { uiComponents } from '@ui/parser/libraries';
 import { ComponentRoot } from '@ui/types';
@@ -21,7 +20,7 @@ export const createComponent = (file: PenpotFile, { figmaId }: ComponentRoot) =>
     componentId,
     componentRoot: true,
     mainInstance: true,
-    type: 'frame'
+    type: 'frame',
   });
 
   if (!frameId) {
@@ -32,6 +31,6 @@ export const createComponent = (file: PenpotFile, { figmaId }: ComponentRoot) =>
     componentId,
     mainInstancePage: file.getCurrentPageId(),
     componentFigmaId: figmaId,
-    mainInstanceId: frameId
+    mainInstanceId: frameId,
   });
 };

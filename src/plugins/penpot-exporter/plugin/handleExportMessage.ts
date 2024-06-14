@@ -8,6 +8,6 @@ export const handleExportMessage = async (missingFontIds: Record<string, string>
 
   figma.ui.postMessage({
     type: 'PENPOT_DOCUMENT',
-    data: await transformDocumentNode(figma.root)
+    data: await transformDocumentNode(figma.root),
   });
 };

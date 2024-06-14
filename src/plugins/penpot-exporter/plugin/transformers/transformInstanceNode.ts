@@ -1,4 +1,4 @@
-import { remoteComponentLibrary } from '@plugin/RemoteComponentLibrary';
+// import { remoteComponentLibrary } from '@plugin/RemoteComponentLibrary';
 import {
   transformBlend,
   transformChildren,
@@ -10,25 +10,20 @@ import {
   transformFills,
   transformProportion,
   transformSceneNode,
-  transformStrokes
+  transformStrokes,
 } from '@plugin/transformers/partials';
-
 import { ComponentInstance } from '@ui/types';
 
-export const transformInstanceNode = async (
-  node: InstanceNode,
-  baseX: number,
-  baseY: number
-): Promise<ComponentInstance | undefined> => {
+export const transformInstanceNode = async (node: InstanceNode, baseX: number, baseY: number): Promise<ComponentInstance | undefined> => {
   const mainComponent = await node.getMainComponentAsync();
 
   if (mainComponent === null || isUnprocessableComponent(mainComponent)) {
     return;
   }
 
-  if (isExternalComponent(mainComponent)) {
-    await registerExternalComponents(mainComponent);
-  }
+  // if (isExternalComponent(mainComponent)) {
+  //   await registerExternalComponents(mainComponent);
+  // }
 
   return {
     type: 'instance',
@@ -46,30 +41,30 @@ export const transformInstanceNode = async (
     ...transformCornerRadius(node),
     ...transformDimensionAndPosition(node, baseX, baseY),
     ...transformConstraints(node),
-    ...(await transformChildren(node, baseX + node.x, baseY + node.y))
+    ...(await transformChildren(node, baseX + node.x, baseY + node.y)),
   };
 };
 
-const registerExternalComponents = async (mainComponent: ComponentNode): Promise<void> => {
-  let component: ComponentSetNode | ComponentNode = mainComponent;
+// const registerExternalComponents = async (mainComponent: ComponentNode): Promise<void> => {
+//   let component: ComponentSetNode | ComponentNode = mainComponent;
 
-  if (component.parent?.type === 'COMPONENT_SET') {
-    component = component.parent;
-  }
+//   if (component.parent?.type === 'COMPONENT_SET') {
+//     component = component.parent;
+//   }
 
-  if (remoteComponentLibrary.get(component.id) !== undefined) {
-    return;
-  }
+//   if (remoteComponentLibrary.get(component.id) !== undefined) {
+//     return;
+//   }
 
-  remoteComponentLibrary.register(component.id, component);
-};
+//   remoteComponentLibrary.register(component.id, component);
+// };
 
-const isExternalComponent = (mainComponent: ComponentNode): boolean => {
-  return (
-    mainComponent.remote ||
-    (mainComponent.parent?.type === 'COMPONENT_SET' && mainComponent.parent.remote)
-  );
-};
+// const isExternalComponent = (mainComponent: ComponentNode): boolean => {
+//   return (
+//     mainComponent.remote ||
+//     (mainComponent.parent?.type === 'COMPONENT_SET' && mainComponent.parent.remote)
+//   );
+// };
 
 /**
  * We do not want to process component instances in the following scenarios:
@@ -80,9 +75,7 @@ const isExternalComponent = (mainComponent: ComponentNode): boolean => {
 const isUnprocessableComponent = (mainComponent: ComponentNode): boolean => {
   return (
     (mainComponent.parent === null && !mainComponent.remote) ||
-    (mainComponent.parent?.type === 'COMPONENT_SET' &&
-      mainComponent.parent.parent === null &&
-      !mainComponent.parent.remote)
+    (mainComponent.parent?.type === 'COMPONENT_SET' && mainComponent.parent.parent === null && !mainComponent.parent.remote)
   );
 };
 

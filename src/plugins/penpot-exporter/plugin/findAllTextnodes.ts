@@ -18,19 +18,12 @@ export const findAllTextNodes = async () => {
       sleep(0);
     }
   }
-
-  figma.ui.postMessage({
-    type: 'CUSTOM_FONTS',
-    data: Array.from(fonts)
-  });
-
-  figma.currentPage.once('nodechange', registerChange);
 };
 
 const extractMissingFonts = (node: TextNode, fonts: Set<string>) => {
   const styledTextSegments = node.getStyledTextSegments(['fontName']);
 
-  styledTextSegments.forEach(segment => {
+  styledTextSegments.forEach((segment) => {
     if (isGoogleFont(segment.fontName) || isLocalFont(segment.fontName)) {
       return;
     }

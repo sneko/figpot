@@ -1,16 +1,8 @@
 import { LayoutChildAttributes } from '@ui/lib/types/shapes/layout';
-import {
-  ShapeAttributes,
-  ShapeBaseAttributes,
-  ShapeGeomAttributes
-} from '@ui/lib/types/shapes/shape';
+import { ShapeAttributes, ShapeBaseAttributes, ShapeGeomAttributes } from '@ui/lib/types/shapes/shape';
 import { Fill } from '@ui/lib/types/utils/fill';
 
-export type TextShape = ShapeBaseAttributes &
-  ShapeGeomAttributes &
-  ShapeAttributes &
-  TextAttributes &
-  LayoutChildAttributes;
+export type TextShape = ShapeBaseAttributes & ShapeGeomAttributes & ShapeAttributes & TextAttributes & LayoutChildAttributes;
 
 export type TextAttributes = {
   type?: 'text';

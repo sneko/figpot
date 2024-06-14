@@ -16,18 +16,7 @@ export type ShapeBaseAttributes = {
   figmaId?: string; // @TODO: move to any other place
   figmaRelatedId?: string; // @TODO: move to any other place
   name?: string;
-  type?:
-    | 'frame'
-    | 'group'
-    | 'bool'
-    | 'rect'
-    | 'path'
-    | 'text'
-    | 'circle'
-    | 'svg-raw'
-    | 'image'
-    | 'component'
-    | 'instance';
+  type?: 'frame' | 'group' | 'bool' | 'rect' | 'path' | 'text' | 'circle' | 'svg-raw' | 'image' | 'component' | 'instance';
   selrect?: Selrect;
   points?: Point[];
   transform?: Matrix;

@@ -1,12 +1,7 @@
+import { Segment } from '@ui/lib/types/shapes/pathShape';
 import { Command, CurveToCommand, LineToCommand, MoveToCommand, parseSVG } from 'svg-path-parser';
 
-import { Segment } from '@ui/lib/types/shapes/pathShape';
-
-export const translateVectorPaths = (
-  paths: VectorPaths,
-  baseX: number,
-  baseY: number
-): Segment[] => {
+export const translateVectorPaths = (paths: VectorPaths, baseX: number, baseY: number): Segment[] => {
   let segments: Segment[] = [];
 
   for (const path of paths) {
@@ -18,12 +13,8 @@ export const translateVectorPaths = (
   return segments;
 };
 
-export const translateCommandsToSegments = (
-  commands: Command[],
-  baseX: number,
-  baseY: number
-): Segment[] => {
-  return commands.map(command => {
+export const translateCommandsToSegments = (commands: Command[], baseX: number, baseY: number): Segment[] => {
+  return commands.map((command) => {
     switch (command.command) {
       case 'moveto':
         return translateMoveToCommand(command, baseX, baseY);
@@ -34,7 +25,7 @@ export const translateCommandsToSegments = (
       case 'closepath':
       default:
         return {
-          command: 'close-path'
+          command: 'close-path',
         };
     }
   });
@@ -43,22 +34,18 @@ export const translateCommandsToSegments = (
 const translateMoveToCommand = (command: MoveToCommand, baseX: number, baseY: number): Segment => {
   return {
     command: 'move-to',
-    params: { x: command.x + baseX, y: command.y + baseY }
+    params: { x: command.x + baseX, y: command.y + baseY },
   };
 };
 
 const translateLineToCommand = (command: LineToCommand, baseX: number, baseY: number): Segment => {
   return {
     command: 'line-to',
-    params: { x: command.x + baseX, y: command.y + baseY }
+    params: { x: command.x + baseX, y: command.y + baseY },
   };
 };
 
-const translateCurveToCommand = (
-  command: CurveToCommand,
-  baseX: number,
-  baseY: number
-): Segment => {
+const translateCurveToCommand = (command: CurveToCommand, baseX: number, baseY: number): Segment => {
   return {
     command: 'curve-to',
     params: {
@@ -67,7 +54,7 @@ const translateCurveToCommand = (
       c2x: command.x2 + baseX,
       c2y: command.y2 + baseY,
       x: command.x + baseX,
-      y: command.y + baseY
-    }
+      y: command.y + baseY,
+    },
   };
 };

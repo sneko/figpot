@@ -19,11 +19,6 @@ export type Stroke = {
 export type StrokeAlignment = 'center' | 'inner' | 'outer';
 
 type StrokeCapLine = 'round' | 'square';
-type StrokeCapMarker =
-  | 'line-arrow'
-  | 'triangle-arrow'
-  | 'square-marker'
-  | 'circle-marker'
-  | 'diamond-marker';
+type StrokeCapMarker = 'line-arrow' | 'triangle-arrow' | 'square-marker' | 'circle-marker' | 'diamond-marker';
 
 export type StrokeCaps = StrokeCapLine | StrokeCapMarker;

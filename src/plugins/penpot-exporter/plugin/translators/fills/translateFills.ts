@@ -1,10 +1,6 @@
 import { translateImageFill, translateSolidFill } from '@plugin/translators/fills';
-import {
-  translateGradientLinearFill,
-  translateGradientRadialFill
-} from '@plugin/translators/fills/gradients';
+import { translateGradientLinearFill, translateGradientRadialFill } from '@plugin/translators/fills/gradients';
 import { rgbToHex } from '@plugin/utils';
-
 import { Fill } from '@ui/lib/types/utils/fill';
 
 export const translateFill = (fill: Paint): Fill | undefined => {
@@ -22,9 +18,7 @@ export const translateFill = (fill: Paint): Fill | undefined => {
   console.error(`Unsupported fill type: ${fill.type}`);
 };
 
-export const translateFills = (
-  fills: readonly Paint[] | typeof figma.mixed | undefined
-): Fill[] => {
+export const translateFills = (fills: readonly Paint[] | typeof figma.mixed | undefined): Fill[] => {
   if (fills === undefined || fills === figma.mixed) return [];
 
   const penpotFills: Fill[] = [];

@@ -1,9 +1,5 @@
 import { LayoutAttributes, LayoutChildAttributes } from '@ui/lib/types/shapes/layout';
-import {
-  ShapeAttributes,
-  ShapeBaseAttributes,
-  ShapeGeomAttributes
-} from '@ui/lib/types/shapes/shape';
+import { ShapeAttributes, ShapeBaseAttributes, ShapeGeomAttributes } from '@ui/lib/types/shapes/shape';
 import { Children } from '@ui/lib/types/utils/children';
 import { Uuid } from '@ui/lib/types/utils/uuid';
 

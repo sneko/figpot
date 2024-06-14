@@ -5,15 +5,12 @@ import { symbolBlendMode } from '@ui/parser/creators/symbols';
 
 import { createItems } from '.';
 
-export const createGroup = (
-  file: PenpotFile,
-  { type, blendMode, children = [], figmaId, figmaRelatedId, ...rest }: GroupShape
-) => {
+export const createGroup = (file: PenpotFile, { type, blendMode, children = [], figmaId, figmaRelatedId, ...rest }: GroupShape) => {
   file.addGroup({
     id: parseFigmaId(file, figmaId),
     shapeRef: parseFigmaId(file, figmaRelatedId, true),
     blendMode: symbolBlendMode(blendMode),
-    ...rest
+    ...rest,
   });
 
   createItems(file, children);

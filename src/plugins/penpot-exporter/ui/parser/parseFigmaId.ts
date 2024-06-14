@@ -3,11 +3,7 @@ import { Uuid } from '@ui/lib/types/utils/uuid';
 
 import { idLibrary } from '.';
 
-export const parseFigmaId = (
-  file: PenpotFile,
-  figmaId?: string,
-  shapeRef: boolean = false
-): Uuid | undefined => {
+export const parseFigmaId = (file: PenpotFile, figmaId?: string, shapeRef: boolean = false): Uuid | undefined => {
   if (!figmaId) {
     if (shapeRef) {
       return;

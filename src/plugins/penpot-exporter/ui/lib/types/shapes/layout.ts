@@ -14,11 +14,7 @@ export const ITEM_ALIGN_SELF_CENTER: unique symbol = Symbol.for('center');
 export const ITEM_ALIGN_SELF_STRETCH: unique symbol = Symbol.for('stretch');
 
 export type LayoutChildAttributes = {
-  layoutItemMarginType?:
-    | 'simple'
-    | 'multiple'
-    | typeof ITEM_MARGIN_SIMPLE_TYPE
-    | typeof ITEM_MARGIN_MULTIPLE_TYPE;
+  layoutItemMarginType?: 'simple' | 'multiple' | typeof ITEM_MARGIN_SIMPLE_TYPE | typeof ITEM_MARGIN_MULTIPLE_TYPE;
   layoutItemMargin?: {
     m1?: number;
     m2?: number;
@@ -29,20 +25,8 @@ export type LayoutChildAttributes = {
   layoutItemMinH?: number;
   layoutItemMaxW?: number;
   layoutItemMinW?: number;
-  layoutItemHSizing?:
-    | 'fill'
-    | 'fix'
-    | 'auto'
-    | typeof ITEM_HSIZING_FILL
-    | typeof ITEM_HSIZING_FIX
-    | typeof ITEM_HSIZING_AUTO;
-  layoutItemVSizing?:
-    | 'fill'
-    | 'fix'
-    | 'auto'
-    | typeof ITEM_VSIZING_FILL
-    | typeof ITEM_VSIZING_FIX
-    | typeof ITEM_VSIZING_AUTO;
+  layoutItemHSizing?: 'fill' | 'fix' | 'auto' | typeof ITEM_HSIZING_FILL | typeof ITEM_HSIZING_FIX | typeof ITEM_HSIZING_AUTO;
+  layoutItemVSizing?: 'fill' | 'fix' | 'auto' | typeof ITEM_VSIZING_FILL | typeof ITEM_VSIZING_FIX | typeof ITEM_VSIZING_AUTO;
   layoutItemAlignSelf?:
     | 'start'
     | 'end'
@@ -56,26 +40,13 @@ export type LayoutChildAttributes = {
   layoutItemZIndex?: number;
 };
 
-type JustifyAlignContent =
-  | 'start'
-  | 'center'
-  | 'end'
-  | 'space-between'
-  | 'space-around'
-  | 'space-evenly'
-  | 'stretch';
+type JustifyAlignContent = 'start' | 'center' | 'end' | 'space-between' | 'space-around' | 'space-evenly' | 'stretch';
 
 type JustifyAlignItems = 'start' | 'end' | 'center' | 'stretch';
 
 export type LayoutAttributes = {
   layout?: 'flex' | 'grid';
-  layoutFlexDir?:
-    | 'row'
-    | 'reverse-row'
-    | 'row-reverse'
-    | 'column'
-    | 'reverse-column'
-    | 'column-reverse';
+  layoutFlexDir?: 'row' | 'reverse-row' | 'row-reverse' | 'column' | 'reverse-column' | 'column-reverse';
   layoutGap?: {
     rowGap?: number;
     columnGap?: number;

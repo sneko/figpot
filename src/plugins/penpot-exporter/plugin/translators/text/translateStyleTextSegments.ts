@@ -7,18 +7,14 @@ import {
   translateLetterSpacing,
   translateLineHeight,
   translateTextDecoration,
-  translateTextTransform
+  translateTextTransform,
 } from '@plugin/translators/text/properties';
-
 import { TextNode as PenpotTextNode, TextStyle } from '@ui/lib/types/shapes/textShape';
 
-export const translateStyleTextSegments = (
-  node: TextNode,
-  segments: StyleTextSegment[]
-): PenpotTextNode[] => {
-  const partials = segments.map(segment => ({
+export const translateStyleTextSegments = (node: TextNode, segments: StyleTextSegment[]): PenpotTextNode[] => {
+  const partials = segments.map((segment) => ({
     textNode: translateStyleTextSegment(node, segment),
-    segment
+    segment,
   }));
 
   return translateParagraphProperties(node, partials);
@@ -35,7 +31,7 @@ export const transformTextStyle = (node: TextNode, segment: StyleTextSegment): T
     textDecoration: translateTextDecoration(segment),
     textTransform: translateTextTransform(segment),
     letterSpacing: translateLetterSpacing(segment),
-    lineHeight: translateLineHeight(segment)
+    lineHeight: translateLineHeight(segment),
   };
 };
 
@@ -43,6 +39,6 @@ const translateStyleTextSegment = (node: TextNode, segment: StyleTextSegment): P
   return {
     fills: translateFills(segment.fills),
     text: segment.characters,
-    ...transformTextStyle(node, segment)
+    ...transformTextStyle(node, segment),
   };
 };

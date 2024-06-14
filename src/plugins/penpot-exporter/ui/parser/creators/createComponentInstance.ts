@@ -7,14 +7,7 @@ import { createArtboard } from '.';
 
 export const createComponentInstance = (
   file: PenpotFile,
-  {
-    type,
-    mainComponentFigmaId,
-    figmaId,
-    figmaRelatedId,
-    isComponentRoot,
-    ...rest
-  }: ComponentInstance
+  { type, mainComponentFigmaId, figmaId, figmaRelatedId, isComponentRoot, ...rest }: ComponentInstance
 ) => {
   let uiComponent = uiComponents.get(mainComponentFigmaId);
 
@@ -27,7 +20,7 @@ export const createComponentInstance = (
     uiComponent = {
       componentId: file.newId(),
       componentFigmaId: mainComponentFigmaId,
-      mainInstanceId
+      mainInstanceId,
     };
     uiComponents.register(mainComponentFigmaId, uiComponent);
   }
@@ -38,6 +31,6 @@ export const createComponentInstance = (
     componentFile: file.getId(),
     componentRoot: isComponentRoot,
     componentId: uiComponent.componentId,
-    type: 'frame'
+    type: 'frame',
   });
 };

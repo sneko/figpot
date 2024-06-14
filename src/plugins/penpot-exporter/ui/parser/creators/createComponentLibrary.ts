@@ -1,5 +1,4 @@
 import { componentsLibrary } from '@plugin/ComponentLibrary';
-
 import { PenpotFile } from '@ui/lib/types/penpotFile';
 import { symbolBlendMode, symbolFills, symbolStrokes } from '@ui/parser/creators/symbols';
 import { uiComponents } from '@ui/parser/libraries';
@@ -7,7 +6,7 @@ import { uiComponents } from '@ui/parser/libraries';
 import { createItems } from '.';
 
 export const createComponentLibrary = (file: PenpotFile) => {
-  uiComponents.all().forEach(uiComponent => {
+  uiComponents.all().forEach((uiComponent) => {
     const component = componentsLibrary.get(uiComponent.componentFigmaId);
     if (!component) {
       return;
@@ -26,7 +25,7 @@ export const createComponentLibrary = (file: PenpotFile) => {
       mainInstanceId: uiComponent.mainInstanceId,
       componentRoot: true,
       mainInstance: true,
-      componentFile: file.getId()
+      componentFile: file.getId(),
     });
 
     createItems(file, children);

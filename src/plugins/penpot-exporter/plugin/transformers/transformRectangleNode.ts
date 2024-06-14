@@ -9,16 +9,11 @@ import {
   transformProportion,
   transformRotationAndPosition,
   transformSceneNode,
-  transformStrokes
+  transformStrokes,
 } from '@plugin/transformers/partials';
-
 import { RectShape } from '@ui/lib/types/shapes/rectShape';
 
-export const transformRectangleNode = (
-  node: RectangleNode,
-  baseX: number,
-  baseY: number
-): RectShape => {
+export const transformRectangleNode = (node: RectangleNode, baseX: number, baseY: number): RectShape => {
   return {
     type: 'rect',
     name: node.name,
@@ -32,6 +27,6 @@ export const transformRectangleNode = (
     ...transformBlend(node),
     ...transformProportion(node),
     ...transformCornerRadius(node),
-    ...transformConstraints(node)
+    ...transformConstraints(node),
   };
 };

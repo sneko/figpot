@@ -7,13 +7,4 @@ import { RectShape } from '@ui/lib/types/shapes/rectShape';
 import { TextShape } from '@ui/lib/types/shapes/textShape';
 import { ComponentInstance, ComponentRoot } from '@ui/types';
 
-export type PenpotNode =
-  | FrameShape
-  | GroupShape
-  | PathShape
-  | RectShape
-  | CircleShape
-  | TextShape
-  | BoolShape
-  | ComponentInstance
-  | ComponentRoot;
+export type PenpotNode = FrameShape | GroupShape | PathShape | RectShape | CircleShape | TextShape | BoolShape | ComponentInstance | ComponentRoot;

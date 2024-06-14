@@ -5,9 +5,5 @@ import { translateGoogleFont } from './gfonts';
 import { translateLocalFont } from './local';
 
 export const translateFontId = (fontName: FontName, fontWeight: number): FontId | undefined => {
-  return (
-    translateGoogleFont(fontName, fontWeight) ??
-    translateLocalFont(fontName, fontWeight) ??
-    translateCustomFont(fontName, fontWeight)
-  );
+  return translateGoogleFont(fontName, fontWeight) ?? translateLocalFont(fontName, fontWeight) ?? translateCustomFont(fontName, fontWeight);
 };

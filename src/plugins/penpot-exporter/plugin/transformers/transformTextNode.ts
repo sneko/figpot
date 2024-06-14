@@ -7,9 +7,8 @@ import {
   transformProportion,
   transformSceneNode,
   transformStrokes,
-  transformText
+  transformText,
 } from '@plugin/transformers/partials';
-
 import { TextShape } from '@ui/lib/types/shapes/textShape';
 
 export const transformTextNode = (node: TextNode, baseX: number, baseY: number): TextShape => {
@@ -24,6 +23,6 @@ export const transformTextNode = (node: TextNode, baseX: number, baseY: number):
     ...transformBlend(node),
     ...transformProportion(node),
     ...transformStrokes(node),
-    ...transformConstraints(node)
+    ...transformConstraints(node),
   };
 };

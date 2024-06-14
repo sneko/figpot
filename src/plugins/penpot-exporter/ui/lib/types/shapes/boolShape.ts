@@ -20,11 +20,7 @@ export type BoolOperations =
   | typeof BOOL_INTERSECTION
   | typeof BOOL_EXCLUDE;
 
-export type BoolShape = ShapeBaseAttributes &
-  ShapeAttributes &
-  BoolAttributes &
-  LayoutChildAttributes &
-  Children;
+export type BoolShape = ShapeBaseAttributes & ShapeAttributes & BoolAttributes & LayoutChildAttributes & Children;
 
 type BoolAttributes = {
   type?: 'bool';

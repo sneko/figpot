@@ -2,7 +2,6 @@ import { remoteComponentLibrary } from '@plugin/RemoteComponentLibrary';
 import { transformGroupNodeLike, transformSceneNode } from '@plugin/transformers';
 import { transformMaskFigmaIds } from '@plugin/transformers/partials';
 import { sleep } from '@plugin/utils';
-
 import { PenpotNode } from '@ui/types';
 
 /**
@@ -28,17 +27,13 @@ export const translateMaskChildren = async (
     ...transformMaskFigmaIds(maskChild),
     ...transformGroupNodeLike(maskChild, baseX, baseY),
     children: maskedChildren,
-    maskedGroup: true
+    maskedGroup: true,
   };
 
   return [...unmaskedChildren, maskGroup];
 };
 
-export const translateChildren = async (
-  children: readonly SceneNode[],
-  baseX: number = 0,
-  baseY: number = 0
-): Promise<PenpotNode[]> => {
+export const translateChildren = async (children: readonly SceneNode[], baseX: number = 0, baseY: number = 0): Promise<PenpotNode[]> => {
   const transformedChildren: PenpotNode[] = [];
 
   for (const child of children) {
@@ -58,13 +53,13 @@ export const translateRemoteChildren = async (): Promise<PenpotNode[]> => {
 
   figma.ui.postMessage({
     type: 'PROGRESS_STEP',
-    data: 'remote'
+    data: 'remote',
   });
 
   while (remoteComponentLibrary.remaining() > 0) {
     figma.ui.postMessage({
       type: 'PROGRESS_TOTAL_ITEMS',
-      data: remoteComponentLibrary.total()
+      data: remoteComponentLibrary.total(),
     });
 
     const child = remoteComponentLibrary.next();
@@ -75,7 +70,7 @@ export const translateRemoteChildren = async (): Promise<PenpotNode[]> => {
 
     figma.ui.postMessage({
       type: 'PROGRESS_PROCESSED_ITEMS',
-      data: currentRemote++
+      data: currentRemote++,
     });
 
     await sleep(0);

@@ -6,7 +6,7 @@ import { uiImages } from '@ui/parser/libraries';
 export const symbolFills = (fills?: Fill[]): Fill[] | undefined => {
   if (!fills) return;
 
-  return fills.map(fill => {
+  return fills.map((fill) => {
     if (fill.fillColorGradient) {
       fill.fillColorGradient = symbolFillGradient(fill.fillColorGradient);
     }
@@ -28,26 +28,22 @@ const symbolFillGradient = (fillGradient: Gradient): Gradient => {
     case 'linear':
       return {
         type: LINEAR_TYPE,
-        ...rest
+        ...rest,
       };
     case 'radial':
       return {
         type: RADIAL_TYPE,
-        ...rest
+        ...rest,
       };
   }
 };
 
-export const symbolFillImage = (
-  fillImage: ImageColor | PartialImageColor
-): ImageColor | undefined => {
+export const symbolFillImage = (fillImage: ImageColor | PartialImageColor): ImageColor | undefined => {
   if (!isPartialFillColor(fillImage)) return fillImage;
 
   return uiImages.get(fillImage.imageHash);
 };
 
-const isPartialFillColor = (
-  imageColor: ImageColor | PartialImageColor
-): imageColor is PartialImageColor => {
+const isPartialFillColor = (imageColor: ImageColor | PartialImageColor): imageColor is PartialImageColor => {
   return 'imageHash' in imageColor;
 };

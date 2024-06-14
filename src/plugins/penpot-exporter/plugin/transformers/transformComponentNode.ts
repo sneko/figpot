@@ -10,16 +10,11 @@ import {
   transformFills,
   transformProportion,
   transformSceneNode,
-  transformStrokes
+  transformStrokes,
 } from '@plugin/transformers/partials';
-
 import { ComponentRoot } from '@ui/types';
 
-export const transformComponentNode = async (
-  node: ComponentNode,
-  baseX: number,
-  baseY: number
-): Promise<ComponentRoot> => {
+export const transformComponentNode = async (node: ComponentNode, baseX: number, baseY: number): Promise<ComponentRoot> => {
   componentsLibrary.register(node.id, {
     type: 'component',
     name: node.name,
@@ -35,11 +30,11 @@ export const transformComponentNode = async (
     ...transformCornerRadius(node),
     ...(await transformChildren(node, baseX + node.x, baseY + node.y)),
     ...transformDimensionAndPosition(node, baseX, baseY),
-    ...transformConstraints(node)
+    ...transformConstraints(node),
   });
 
   return {
     figmaId: node.id,
-    type: 'component'
+    type: 'component',
   };
 };

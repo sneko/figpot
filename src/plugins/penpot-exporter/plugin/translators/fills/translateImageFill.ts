@@ -1,5 +1,4 @@
 import { imagesLibrary } from '@plugin/ImageLibrary';
-
 import { Fill } from '@ui/lib/types/utils/fill';
 import { PartialImageColor } from '@ui/lib/types/utils/imageColor';
 
@@ -9,7 +8,7 @@ export const translateImageFill = (fill: ImagePaint): Fill | undefined => {
 
   return {
     fillOpacity: !fill.visible ? 0 : fill.opacity,
-    fillImage
+    fillImage,
   };
 };
 
@@ -21,6 +20,6 @@ const translateImage = (imageHash: string | null): PartialImageColor | undefined
   }
 
   return {
-    imageHash
+    imageHash,
   };
 };

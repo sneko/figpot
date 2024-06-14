@@ -11,7 +11,7 @@ export const parseImage = async (bytes: Uint8Array): Promise<ImageColor> => {
     height: image.height,
     dataUri: image.dataURL,
     keepAspectRatio: true,
-    id: '00000000-0000-0000-0000-000000000000'
+    id: '00000000-0000-0000-0000-000000000000',
   };
 };
 
@@ -35,19 +35,17 @@ async function extractFromBytes(bytes: Uint8Array) {
 
   context.drawImage(image, 0, 0);
 
-  const dataURL = await canvas
-    .convertToBlob({ type: mymeType, quality: IMAGE_QUALITY })
-    .then(blob => {
-      return new Promise<string>(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
+  const dataURL = await canvas.convertToBlob({ type: mymeType, quality: IMAGE_QUALITY }).then((blob) => {
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
     });
+  });
 
   return {
     dataURL,
     width: image.width,
-    height: image.height
+    height: image.height,
   };
 }

@@ -1,7 +1,6 @@
 import { componentsLibrary } from '@plugin/ComponentLibrary';
 // @TODO: Direct import on purpose, to avoid problems with the tsc linting
 import { sleep } from '@plugin/utils/sleep';
-
 import { sendMessage } from '@ui/context';
 import { createFile } from '@ui/lib/penpot';
 import { createComponentLibrary, createPage } from '@ui/parser/creators';
@@ -16,12 +15,12 @@ const optimizeImages = async (images: Record<string, Uint8Array>) => {
 
   sendMessage({
     type: 'PROGRESS_STEP',
-    data: 'optimization'
+    data: 'optimization',
   });
 
   sendMessage({
     type: 'PROGRESS_TOTAL_ITEMS',
-    data: imagesToOptimize.length
+    data: imagesToOptimize.length,
   });
 
   for (const [key, bytes] of imagesToOptimize) {
@@ -31,7 +30,7 @@ const optimizeImages = async (images: Record<string, Uint8Array>) => {
 
     sendMessage({
       type: 'PROGRESS_PROCESSED_ITEMS',
-      data: imagesOptimized++
+      data: imagesOptimized++,
     });
 
     await sleep(0);
@@ -45,7 +44,7 @@ export const parse = async ({ name, children = [], components, images }: PenpotD
 
   sendMessage({
     type: 'PROGRESS_STEP',
-    data: 'downloading'
+    data: 'downloading',
   });
 
   await sleep(20);

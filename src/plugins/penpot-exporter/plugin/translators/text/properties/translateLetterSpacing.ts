@@ -1,6 +1,4 @@
-export const translateLetterSpacing = (
-  segment: Pick<StyledTextSegment, 'letterSpacing' | 'fontSize'>
-): number => {
+export const translateLetterSpacing = (segment: Pick<StyledTextSegment, 'letterSpacing' | 'fontSize'>): number => {
   switch (segment.letterSpacing.unit) {
     case 'PIXELS':
       return segment.letterSpacing.value;

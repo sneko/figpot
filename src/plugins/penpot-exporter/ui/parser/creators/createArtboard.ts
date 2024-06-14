@@ -8,17 +8,7 @@ import { createItems } from '.';
 
 export const createArtboard = (
   file: PenpotFile,
-  {
-    type,
-    fills,
-    strokes,
-    blendMode,
-    children = [],
-    figmaId,
-    figmaRelatedId,
-    shapeRef,
-    ...rest
-  }: FrameShape
+  { type, fills, strokes, blendMode, children = [], figmaId, figmaRelatedId, shapeRef, ...rest }: FrameShape
 ): Uuid | undefined => {
   const id = parseFigmaId(file, figmaId);
 
@@ -28,7 +18,7 @@ export const createArtboard = (
     fills: symbolFills(fills),
     strokes: symbolStrokes(strokes),
     blendMode: symbolBlendMode(blendMode),
-    ...rest
+    ...rest,
   });
 
   createItems(file, children);

@@ -1,3 +1,0 @@
-body :not:has(.wrapper-overflow) {
-  overflow-y: hidden;
-}

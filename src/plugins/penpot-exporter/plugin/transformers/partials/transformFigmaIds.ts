@@ -1,21 +1,17 @@
 import { ShapeBaseAttributes } from '@ui/lib/types/shapes/shape';
 
-export const transformFigmaIds = (
-  node: SceneNode
-): Pick<ShapeBaseAttributes, 'figmaId' | 'figmaRelatedId'> => {
+export const transformFigmaIds = (node: SceneNode): Pick<ShapeBaseAttributes, 'figmaId' | 'figmaRelatedId'> => {
   return {
     figmaId: normalizeNodeId(node.id),
-    figmaRelatedId: getRelatedNodeId(node.id)
+    figmaRelatedId: getRelatedNodeId(node.id),
   };
 };
 
-export const transformMaskFigmaIds = (
-  node: SceneNode
-): Pick<ShapeBaseAttributes, 'figmaId' | 'figmaRelatedId'> => {
+export const transformMaskFigmaIds = (node: SceneNode): Pick<ShapeBaseAttributes, 'figmaId' | 'figmaRelatedId'> => {
   const transformedIds = transformFigmaIds(node);
   return {
     figmaId: `M${transformedIds.figmaId}`,
-    figmaRelatedId: transformedIds.figmaRelatedId ? `M${transformedIds.figmaRelatedId}` : undefined
+    figmaRelatedId: transformedIds.figmaRelatedId ? `M${transformedIds.figmaRelatedId}` : undefined,
   };
 };
 

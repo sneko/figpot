@@ -5,8 +5,7 @@ export const transformRotationAndPosition = (
   node: LayoutMixin,
   baseX: number,
   baseY: number
-): Pick<ShapeBaseAttributes, 'transform' | 'transformInverse' | 'rotation'> &
-  Pick<ShapeGeomAttributes, 'x' | 'y'> => {
+): Pick<ShapeBaseAttributes, 'transform' | 'transformInverse' | 'rotation'> & Pick<ShapeGeomAttributes, 'x' | 'y'> => {
   const rotation = node.rotation;
   const x = node.x + baseX;
   const y = node.y + baseY;
@@ -17,7 +16,7 @@ export const transformRotationAndPosition = (
       y,
       rotation,
       transform: undefined,
-      transformInverse: undefined
+      transformInverse: undefined,
     };
   }
 
@@ -32,7 +31,7 @@ export const transformRotationAndPosition = (
       c: node.absoluteTransform[0][1],
       d: node.absoluteTransform[1][1],
       e: 0,
-      f: 0
+      f: 0,
     },
     transformInverse: {
       a: node.absoluteTransform[0][0],
@@ -40,29 +39,29 @@ export const transformRotationAndPosition = (
       c: node.absoluteTransform[1][0],
       d: node.absoluteTransform[1][1],
       e: 0,
-      f: 0
-    }
+      f: 0,
+    },
   };
 };
 
 const getRotatedPoint = (point: Point, transform: Transform, boundingBox: Rect): Point => {
   const centerPoint = {
     x: boundingBox.x + boundingBox.width / 2,
-    y: boundingBox.y + boundingBox.height / 2
+    y: boundingBox.y + boundingBox.height / 2,
   };
 
   const relativePoint = {
     x: point.x - centerPoint.x,
-    y: point.y - centerPoint.y
+    y: point.y - centerPoint.y,
   };
 
   const rotatedPoint = {
     x: relativePoint.x * transform[0][0] + relativePoint.y * transform[1][0],
-    y: relativePoint.x * transform[0][1] + relativePoint.y * transform[1][1]
+    y: relativePoint.x * transform[0][1] + relativePoint.y * transform[1][1],
   };
 
   return {
     x: centerPoint.x + rotatedPoint.x,
-    y: centerPoint.y + rotatedPoint.y
+    y: centerPoint.y + rotatedPoint.y,
   };
 };

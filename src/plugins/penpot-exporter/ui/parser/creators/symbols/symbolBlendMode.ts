@@ -15,7 +15,7 @@ import {
   BLEND_MODE_SATURATION,
   BLEND_MODE_SCREEN,
   BLEND_MODE_SOFT_LIGHT,
-  BlendMode
+  BlendMode,
 } from '@ui/lib/types/utils/blendModes';
 
 export const symbolBlendMode = (blendMode?: BlendMode): BlendMode | undefined => {

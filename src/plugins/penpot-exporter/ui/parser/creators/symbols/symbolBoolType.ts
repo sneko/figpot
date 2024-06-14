@@ -1,10 +1,4 @@
-import {
-  BOOL_DIFFERENCE,
-  BOOL_EXCLUDE,
-  BOOL_INTERSECTION,
-  BOOL_UNION,
-  BoolOperations
-} from '@ui/lib/types/shapes/boolShape';
+import { BOOL_DIFFERENCE, BOOL_EXCLUDE, BOOL_INTERSECTION, BOOL_UNION, BoolOperations } from '@ui/lib/types/shapes/boolShape';
 
 export const symbolBoolType = (booleanOperation: BoolOperations): BoolOperations => {
   if (typeof booleanOperation !== 'string') return booleanOperation;

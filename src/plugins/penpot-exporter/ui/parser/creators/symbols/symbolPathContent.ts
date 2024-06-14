@@ -1,12 +1,4 @@
-import {
-  Command,
-  PathContent,
-  Segment,
-  VECTOR_CLOSE_PATH,
-  VECTOR_CURVE_TO,
-  VECTOR_LINE_TO,
-  VECTOR_MOVE_TO
-} from '@ui/lib/types/shapes/pathShape';
+import { Command, PathContent, Segment, VECTOR_CLOSE_PATH, VECTOR_CURVE_TO, VECTOR_LINE_TO, VECTOR_MOVE_TO } from '@ui/lib/types/shapes/pathShape';
 
 export const symbolPathContent = (content: PathContent): PathContent =>
   content.map(({ command: stringCommand, ...rest }) => {
@@ -14,7 +6,7 @@ export const symbolPathContent = (content: PathContent): PathContent =>
 
     return {
       command,
-      ...rest
+      ...rest,
     } as Segment;
   });
 

@@ -10,7 +10,7 @@ import {
   createGroup,
   createPath,
   createRectangle,
-  createText
+  createText,
 } from '.';
 
 export const createItems = (file: PenpotFile, nodes: PenpotNode[]) => {

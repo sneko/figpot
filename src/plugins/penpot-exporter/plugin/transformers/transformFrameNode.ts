@@ -9,20 +9,15 @@ import {
   transformFills,
   transformProportion,
   transformSceneNode,
-  transformStrokes
+  transformStrokes,
 } from '@plugin/transformers/partials';
-
 import { FrameShape } from '@ui/lib/types/shapes/frameShape';
 
 const isSectionNode = (node: FrameNode | SectionNode | ComponentSetNode): node is SectionNode => {
   return node.type === 'SECTION';
 };
 
-export const transformFrameNode = async (
-  node: FrameNode | SectionNode | ComponentSetNode,
-  baseX: number,
-  baseY: number
-): Promise<FrameShape> => {
+export const transformFrameNode = async (node: FrameNode | SectionNode | ComponentSetNode, baseX: number, baseY: number): Promise<FrameShape> => {
   let frameSpecificAttributes: Partial<FrameShape> = {};
 
   if (!isSectionNode(node)) {
@@ -36,7 +31,7 @@ export const transformFrameNode = async (
       ...transformProportion(node),
       ...transformCornerRadius(node),
       ...transformEffects(node),
-      ...transformConstraints(node)
+      ...transformConstraints(node),
     };
   }
 
@@ -49,6 +44,6 @@ export const transformFrameNode = async (
     ...frameSpecificAttributes,
     ...(await transformChildren(node, baseX + node.x, baseY + node.y)),
     ...transformDimensionAndPosition(node, baseX, baseY),
-    ...transformSceneNode(node)
+    ...transformSceneNode(node),
   };
 };

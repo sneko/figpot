@@ -1,20 +1,17 @@
 import { translateFill } from '@plugin/translators/fills';
-
 import { Stroke, StrokeAlignment, StrokeCaps } from '@ui/lib/types/utils/stroke';
 
 export const translateStrokes = (
   node: MinimalStrokesMixin | (MinimalStrokesMixin & IndividualStrokesMixin),
-  strokeCaps: (stroke: Stroke) => Stroke = stroke => stroke
+  strokeCaps: (stroke: Stroke) => Stroke = (stroke) => stroke
 ): Stroke[] => {
   const sharedStrokeProperties: Stroke = {
     strokeWidth: translateStrokeWeight(node),
     strokeAlignment: translateStrokeAlignment(node.strokeAlign),
-    strokeStyle: node.dashPattern.length ? 'dashed' : 'solid'
+    strokeStyle: node.dashPattern.length ? 'dashed' : 'solid',
   };
 
-  return node.strokes.map((paint, index) =>
-    translateStroke(paint, sharedStrokeProperties, strokeCaps, index === 0)
-  );
+  return node.strokes.map((paint, index) => translateStroke(paint, sharedStrokeProperties, strokeCaps, index === 0));
 };
 
 export const translateStroke = (
@@ -29,7 +26,7 @@ export const translateStroke = (
     strokeColor: fill?.fillColor,
     strokeOpacity: fill?.fillOpacity,
     strokeImage: fill?.fillImage,
-    ...sharedStrokeProperties
+    ...sharedStrokeProperties,
   };
 
   if (firstStroke) {
@@ -60,9 +57,7 @@ export const translateStrokeCap = (vertex: VectorVertex): StrokeCaps | undefined
   }
 };
 
-const translateStrokeWeight = (
-  node: MinimalStrokesMixin | (MinimalStrokesMixin & IndividualStrokesMixin)
-): number => {
+const translateStrokeWeight = (node: MinimalStrokesMixin | (MinimalStrokesMixin & IndividualStrokesMixin)): number => {
   if (node.strokeWeight !== figma.mixed) {
     return node.strokeWeight;
   }
@@ -71,23 +66,14 @@ const translateStrokeWeight = (
     return 1;
   }
 
-  return Math.max(
-    node.strokeTopWeight,
-    node.strokeRightWeight,
-    node.strokeBottomWeight,
-    node.strokeLeftWeight
-  );
+  return Math.max(node.strokeTopWeight, node.strokeRightWeight, node.strokeBottomWeight, node.strokeLeftWeight);
 };
 
-const isIndividualStrokes = (
-  node: MinimalStrokesMixin | IndividualStrokesMixin
-): node is IndividualStrokesMixin => {
+const isIndividualStrokes = (node: MinimalStrokesMixin | IndividualStrokesMixin): node is IndividualStrokesMixin => {
   return 'strokeTopWeight' in node;
 };
 
-const translateStrokeAlignment = (
-  strokeAlign: 'CENTER' | 'INSIDE' | 'OUTSIDE'
-): StrokeAlignment => {
+const translateStrokeAlignment = (strokeAlign: 'CENTER' | 'INSIDE' | 'OUTSIDE'): StrokeAlignment => {
   switch (strokeAlign) {
     case 'CENTER':
       return 'center';

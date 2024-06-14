@@ -9,11 +9,7 @@ export class Paragraph {
   private firstTextNode: PenpotTextNode | null = null;
   private list = new List();
 
-  public format(
-    node: TextNode,
-    textNode: PenpotTextNode,
-    segment: StyleTextSegment
-  ): PenpotTextNode[] {
+  public format(node: TextNode, textNode: PenpotTextNode, segment: StyleTextSegment): PenpotTextNode[] {
     const textNodes: PenpotTextNode[] = [];
 
     const spacing = this.applySpacing(segment, node);
@@ -30,17 +26,11 @@ export class Paragraph {
     return textNodes;
   }
 
-  private applyIndentation(
-    textNode: PenpotTextNode,
-    segment: StyleTextSegment,
-    node: TextNode
-  ): PenpotTextNode | undefined {
+  private applyIndentation(textNode: PenpotTextNode, segment: StyleTextSegment, node: TextNode): PenpotTextNode | undefined {
     if (this.isParagraphStarting || this.isFirstTextNode(textNode)) {
       this.list.update(textNode, segment);
 
-      return segment.listOptions.type !== 'NONE'
-        ? this.list.getCurrentList(textNode, segment)
-        : this.segmentIndent(node.paragraphIndent);
+      return segment.listOptions.type !== 'NONE' ? this.list.getCurrentList(textNode, segment) : this.segmentIndent(node.paragraphIndent);
     }
   }
 
@@ -48,9 +38,7 @@ export class Paragraph {
     if (this.isParagraphStarting) {
       const isList = segment.listOptions.type !== 'NONE';
 
-      return this.segmentParagraphSpacing(
-        this.isPreviousNodeAList && isList ? node.listSpacing : node.paragraphSpacing
-      );
+      return this.segmentParagraphSpacing(this.isPreviousNodeAList && isList ? node.listSpacing : node.paragraphSpacing);
     }
   }
 
@@ -72,7 +60,7 @@ export class Paragraph {
       fontStyle: 'normal',
       fontWeight: '400',
       lineHeight: 1,
-      letterSpacing: 0
+      letterSpacing: 0,
     };
   }
 
@@ -87,7 +75,7 @@ export class Paragraph {
       fontStyle: 'normal',
       fontWeight: '400',
       lineHeight: 1,
-      letterSpacing: 0
+      letterSpacing: 0,
     };
   }
 }

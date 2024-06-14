@@ -1,5 +1,4 @@
 import { rgbToHex } from '@plugin/utils';
-
 import { Shadow, ShadowStyle } from '@ui/lib/types/utils/shadow';
 
 export const translateShadowEffect = (effect: Effect): Shadow | undefined => {
@@ -16,8 +15,8 @@ export const translateShadowEffect = (effect: Effect): Shadow | undefined => {
     hidden: !effect.visible,
     color: {
       color: rgbToHex(effect.color),
-      opacity: effect.color.a
-    }
+      opacity: effect.color.a,
+    },
   };
 };
 

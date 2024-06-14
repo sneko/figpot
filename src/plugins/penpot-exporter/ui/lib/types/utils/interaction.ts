@@ -10,23 +10,9 @@ export type Interaction =
   | InteractionPrevScreen
   | InteractionOpenUrl;
 
-type EventType =
-  | 'click'
-  | 'mouse-press'
-  | 'mouse-over'
-  | 'mouse-enter'
-  | 'mouse-leave'
-  | 'after-delay';
+type EventType = 'click' | 'mouse-press' | 'mouse-over' | 'mouse-enter' | 'mouse-leave' | 'after-delay';
 
-type OverlayPosType =
-  | 'manual'
-  | 'center'
-  | 'top-left'
-  | 'top-right'
-  | 'top-center'
-  | 'bottom-left'
-  | 'bottom-right'
-  | 'bottom-center';
+type OverlayPosType = 'manual' | 'center' | 'top-left' | 'top-right' | 'top-center' | 'bottom-left' | 'bottom-right' | 'bottom-center';
 
 type InteractionNavigate = {
   actionType: 'navigate';

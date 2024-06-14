@@ -8,16 +8,11 @@ import {
   transformProportion,
   transformRotationAndPosition,
   transformSceneNode,
-  transformStrokes
+  transformStrokes,
 } from '@plugin/transformers/partials';
-
 import { CircleShape } from '@ui/lib/types/shapes/circleShape';
 
-export const transformEllipseNode = (
-  node: EllipseNode,
-  baseX: number,
-  baseY: number
-): CircleShape => {
+export const transformEllipseNode = (node: EllipseNode, baseX: number, baseY: number): CircleShape => {
   return {
     type: 'circle',
     name: node.name,
@@ -30,6 +25,6 @@ export const transformEllipseNode = (
     ...transformSceneNode(node),
     ...transformBlend(node),
     ...transformProportion(node),
-    ...transformConstraints(node)
+    ...transformConstraints(node),
   };
 };

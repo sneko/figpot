@@ -1,7 +1,6 @@
 import { transformFills } from '@plugin/transformers/partials';
 import { transformTextStyle, translateStyleTextSegments } from '@plugin/translators/text';
 import { translateGrowType, translateVerticalAlign } from '@plugin/translators/text/properties';
-
 import { TextAttributes, TextShape } from '@ui/lib/types/shapes/textShape';
 
 export const transformText = (node: TextNode): TextAttributes & Pick<TextShape, 'growType'> => {
@@ -15,7 +14,7 @@ export const transformText = (node: TextNode): TextAttributes & Pick<TextShape, 
     'textDecoration',
     'indentation',
     'listOptions',
-    'fills'
+    'fills',
   ]);
 
   return {
@@ -31,13 +30,13 @@ export const transformText = (node: TextNode): TextAttributes & Pick<TextShape, 
                   type: 'paragraph',
                   children: translateStyleTextSegments(node, styledTextSegments),
                   ...transformTextStyle(node, styledTextSegments[0]),
-                  ...transformFills(node)
-                }
-              ]
-            }
+                  ...transformFills(node),
+                },
+              ],
+            },
           ]
-        : undefined
+        : undefined,
     },
-    growType: translateGrowType(node)
+    growType: translateGrowType(node),
   };
 };

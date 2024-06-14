@@ -10,19 +10,15 @@ import {
   transformPathNode,
   transformRectangleNode,
   transformTextNode,
-  transformVectorNode
+  transformVectorNode,
 } from '.';
 
-export const transformSceneNode = async (
-  node: SceneNode,
-  baseX: number = 0,
-  baseY: number = 0
-): Promise<PenpotNode | undefined> => {
+export const transformSceneNode = async (node: SceneNode, baseX: number = 0, baseY: number = 0): Promise<PenpotNode | undefined> => {
   let penpotNode: PenpotNode | undefined;
 
   figma.ui.postMessage({
     type: 'PROGRESS_CURRENT_ITEM',
-    data: node.name
+    data: node.name,
   });
 
   switch (node.type) {

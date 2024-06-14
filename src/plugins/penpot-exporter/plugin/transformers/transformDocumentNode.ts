@@ -1,9 +1,8 @@
 import { componentsLibrary } from '@plugin/ComponentLibrary';
 import { imagesLibrary } from '@plugin/ImageLibrary';
-import { remoteComponentLibrary } from '@plugin/RemoteComponentLibrary';
+// import { remoteComponentLibrary } from '@plugin/RemoteComponentLibrary';
 import { translateRemoteChildren } from '@plugin/translators';
 import { sleep } from '@plugin/utils';
-
 import { PenpotPage } from '@ui/lib/types/penpotPage';
 import { PenpotDocument } from '@ui/types';
 
@@ -14,15 +13,15 @@ const downloadImages = async (): Promise<Record<string, Uint8Array>> => {
   const images: Record<string, Uint8Array> = {};
   let currentImage = 1;
 
-  figma.ui.postMessage({
-    type: 'PROGRESS_STEP',
-    data: 'images'
-  });
+  // figma.ui.postMessage({
+  //   type: 'PROGRESS_STEP',
+  //   data: 'images',
+  // });
 
-  figma.ui.postMessage({
-    type: 'PROGRESS_TOTAL_ITEMS',
-    data: imageToDownload.length
-  });
+  // figma.ui.postMessage({
+  //   type: 'PROGRESS_TOTAL_ITEMS',
+  //   data: imageToDownload.length,
+  // });
 
   for (const [key, image] of imageToDownload) {
     const bytes = await image?.getBytesAsync();
@@ -33,7 +32,7 @@ const downloadImages = async (): Promise<Record<string, Uint8Array>> => {
 
     figma.ui.postMessage({
       type: 'PROGRESS_PROCESSED_ITEMS',
-      data: currentImage++
+      data: currentImage++,
     });
 
     await sleep(0);
@@ -50,7 +49,7 @@ const processPages = async (node: DocumentNode): Promise<PenpotPage[]> => {
 
   figma.ui.postMessage({
     type: 'PROGRESS_TOTAL_ITEMS',
-    data: node.children.length
+    data: node.children.length,
   });
 
   for (const page of node.children) {
@@ -60,7 +59,7 @@ const processPages = async (node: DocumentNode): Promise<PenpotPage[]> => {
 
     figma.ui.postMessage({
       type: 'PROGRESS_PROCESSED_ITEMS',
-      data: currentPage++
+      data: currentPage++,
     });
 
     await sleep(0);
@@ -72,17 +71,17 @@ const processPages = async (node: DocumentNode): Promise<PenpotPage[]> => {
 export const transformDocumentNode = async (node: DocumentNode): Promise<PenpotDocument> => {
   const children = await processPages(node);
 
-  if (remoteComponentLibrary.remaining() > 0) {
-    children.push({
-      name: 'External Components',
-      children: await translateRemoteChildren()
-    });
-  }
+  // if (remoteComponentLibrary.remaining() > 0) {
+  //   children.push({
+  //     name: 'External Components',
+  //     children: await translateRemoteChildren()
+  //   });
+  // }
 
   return {
     name: node.name,
     children,
     components: componentsLibrary.all(),
-    images: await downloadImages()
+    images: await downloadImages(),
   };
 };

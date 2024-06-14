@@ -33,7 +33,7 @@ export const translateParagraphProperties = (
   partials.forEach(({ textNode, segment }) => {
     splitSegments.push({
       textNodes: splitTextNodeByEOL(textNode),
-      segment
+      segment,
     });
   });
 
@@ -41,23 +41,20 @@ export const translateParagraphProperties = (
 };
 
 const splitTextNodeByEOL = (node: PenpotTextNode): PenpotTextNode[] => {
-  const split = node.text.split(/(\n)/).filter(text => text !== '');
+  const split = node.text.split(/(\n)/).filter((text) => text !== '');
 
-  return split.map(text => ({
+  return split.map((text) => ({
     ...node,
-    text: text
+    text: text,
   }));
 };
 
-const addParagraphProperties = (
-  node: TextNode,
-  partials: PartialTranslation[]
-): PenpotTextNode[] => {
+const addParagraphProperties = (node: TextNode, partials: PartialTranslation[]): PenpotTextNode[] => {
   const formattedParagraphs: PenpotTextNode[] = [];
   const paragraph = new Paragraph();
 
   partials.forEach(({ textNodes, segment }) =>
-    textNodes.forEach(textNode => {
+    textNodes.forEach((textNode) => {
       formattedParagraphs.push(...paragraph.format(node, textNode, segment));
     })
   );
