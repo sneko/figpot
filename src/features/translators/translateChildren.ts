@@ -1,14 +1,13 @@
 import { SubcanvasNode } from '@figpot/src/clients/figma';
-import { PenpotNode } from '@figpot/src/features/penpot';
+import { transformSceneNode } from '@figpot/src/features/transformers/transformSceneNode';
+import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 
-export async function translateChildren(children: readonly SubcanvasNode[], baseX: number = 0, baseY: number = 0): Promise<PenpotNode[]> {
-  const transformedChildren: PenpotNode[] = [];
+export function translateChildren(figmaChildren: readonly SubcanvasNode[], flattenChildren: PenpotNode[], baseX: number = 0, baseY: number = 0) {
+  for (const figmaChild of figmaChildren) {
+    const penpotNode = transformSceneNode(figmaChild, baseX, baseY);
 
-  for (const child of children) {
-    const penpotNode = await transformSceneNode(child, baseX, baseY);
-
-    if (penpotNode) transformedChildren.push(penpotNode);
+    if (penpotNode) {
+      flattenChildren.push(penpotNode);
+    }
   }
-
-  return transformedChildren;
 }

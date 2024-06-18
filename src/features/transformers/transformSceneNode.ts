@@ -1,6 +1,6 @@
 import { SubcanvasNode } from '@figpot/src/clients/figma';
-import { PenpotNode } from '@figpot/src/features/penpot';
 import { transformRectangleNode } from '@figpot/src/features/transformers/transformRectangleNode';
+import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 
 // TODO:
 // import {

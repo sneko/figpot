@@ -1,5 +1,4 @@
 import { RectangleNode } from '@figpot/src/clients/figma';
-import { RectShape } from '@figpot/src/features/penpot';
 import { transformBlend } from '@figpot/src/features/transformers/partials/transformBlend';
 import { transformConstraints } from '@figpot/src/features/transformers/partials/transformConstraints';
 // import { transformCornerRadius } from '@figpot/src/features/transformers/partials/transformCornerRadius';
@@ -11,6 +10,7 @@ import { transformProportion } from '@figpot/src/features/transformers/partials/
 import { transformRotationAndPosition } from '@figpot/src/features/transformers/partials/transformRotationAndPosition';
 import { transformSceneNode } from '@figpot/src/features/transformers/partials/transformSceneNode';
 import { transformStrokes } from '@figpot/src/features/transformers/partials/transformStrokes';
+import { RectShape } from '@figpot/src/models/entities/penpot/shapes/rect';
 
 export function transformRectangleNode(node: RectangleNode, baseX: number, baseY: number): RectShape {
   return {

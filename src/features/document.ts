@@ -1,9 +1,18 @@
+import { camelCase } from 'change-case/keys';
 import fsSync from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import { z } from 'zod';
 
 import { GetFileResponse, getFile } from '@figpot/src/clients/figma';
+import {
+  PostCommandGetFileResponse,
+  postCommandGetFile,
+  postCommandGetFileFragment,
+  postCommandGetPage,
+  postCommandGetProfile,
+  postCommandGetProjectFiles,
+} from '@figpot/src/clients/penpot';
 import { transformPageNode } from '@figpot/src/features/transformers/transformPageNode';
 
 const __root_dirname = process.cwd();
@@ -17,6 +26,14 @@ export const RetrieveOptions = z.object({
 });
 export type RetrieveOptionsType = z.infer<typeof RetrieveOptions>;
 
+export function getFigmaDocumentPath(documentId: string) {
+  return path.resolve(documentsFolderPath, `figma_${documentId}`);
+}
+
+export function getPenpotDocumentPath(figmaDocumentId: string, penpotDocumentId: string) {
+  return path.resolve(getFigmaDocumentPath(figmaDocumentId), 'export', `penpot_${penpotDocumentId}`);
+}
+
 export async function retrieve(options: RetrieveOptionsType) {
   const documents = options.figmaDocuments;
 
@@ -27,7 +44,7 @@ export async function retrieve(options: RetrieveOptionsType) {
       geometry: 'paths',
     });
 
-    const documentFolderPath = path.resolve(documentsFolderPath, `figma_${documentId}`);
+    const documentFolderPath = getFigmaDocumentPath(documentId);
     await fs.mkdir(documentFolderPath, { recursive: true });
 
     const treePath = path.resolve(documentFolderPath, 'tree.json');
@@ -84,6 +101,47 @@ export async function compare(options: CompareOptionsType) {
   // Take the Penpot one that has Figma node IDs and use the one from the mappings
   // Get documents from Penpot if already synchronized in the past
   // Calculate operations needed on the current hosted tree to match the Figma documents state
+
+  const figmaDocuments = options.figmaDocuments;
+  const penpotDocuments = options.penpotDocuments || [];
+
+  for (const figmaDocumentId of figmaDocuments) {
+    const figmaDocumentFolderPath = getFigmaDocumentPath(figmaDocumentId);
+    let figmaDocumentFolderExists = fsSync.existsSync(figmaDocumentFolderPath);
+
+    if (!figmaDocumentFolderExists) {
+      throw new Error('figma document not existing locally, make sure to trigger commands in the right order');
+    }
+
+    for (const penpotDocumentId of penpotDocuments) {
+      let document = await postCommandGetFile({
+        requestBody: {
+          id: penpotDocumentId,
+        },
+      });
+
+      // TODO: for now the response is kebab-case despite types, so forcing the conversion (ref: https://github.com/penpot/penpot/pull/4760#pullrequestreview-2125984653)
+      document = camelCase(document, Number.MAX_SAFE_INTEGER) as PostCommandGetFileResponse;
+
+      const penpotDocumentFolderPath = getPenpotDocumentPath(figmaDocumentId, penpotDocumentId);
+      await fs.mkdir(penpotDocumentFolderPath, { recursive: true });
+
+      const treePath = path.resolve(penpotDocumentFolderPath, 'hosted-tree.json');
+      await fs.writeFile(treePath, JSON.stringify(document, null, 2));
+
+      // We remove fields not meaningful and specific to Penpot and those that are dynamic (so it can be compared to the conversion from Figma)
+      const hostedCoreDocument = {
+        name: document.name,
+        data: !!document.data
+          ? {
+              pagesIndex: (document.data as any).pagesIndex,
+            }
+          : undefined,
+      };
+
+      const figmaTreePath = path.resolve(figmaDocumentFolderPath, 'tree.json');
+    }
+  }
 }
 
 export const SetOptions = z.object({
