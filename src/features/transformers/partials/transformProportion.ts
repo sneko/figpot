@@ -1,7 +1,8 @@
+import { HasLayoutTrait } from '@figpot/src/clients/figma';
 import { ShapeAttributes } from '@figpot/src/models/entities/penpot/shape';
 
-export async function transformProportion(node: LayoutMixin): Pick<ShapeAttributes, 'proportionLock'> {
+export function transformProportion(node: HasLayoutTrait): Pick<ShapeAttributes, 'proportionLock'> {
   return {
-    proportionLock: node.constrainProportions,
+    proportionLock: node.preserveRatio,
   };
 }

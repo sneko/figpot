@@ -4,7 +4,7 @@ import { transformConstraints } from '@figpot/src/features/transformers/partials
 // import { transformCornerRadius } from '@figpot/src/features/transformers/partials/transformCornerRadius';
 import { transformDimension } from '@figpot/src/features/transformers/partials/transformDimensionAndPosition';
 import { transformEffects } from '@figpot/src/features/transformers/partials/transformEffects';
-import { transformFigmaIds } from '@figpot/src/features/transformers/partials/transformFigmaIds';
+// import { transformFigmaIds } from '@figpot/src/features/transformers/partials/transformFigmaIds';
 import { transformFills } from '@figpot/src/features/transformers/partials/transformFills';
 import { transformProportion } from '@figpot/src/features/transformers/partials/transformProportion';
 import { transformRotationAndPosition } from '@figpot/src/features/transformers/partials/transformRotationAndPosition';

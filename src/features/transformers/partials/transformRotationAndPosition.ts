@@ -1,68 +1,93 @@
-import { ShapeBaseAttributes, ShapeGeomAttributes } from "@figpot/src/models/entities/penpot/shape";
-import { Point } from "@figpot/src/models/entities/penpot/traits/point";
+import assert from 'assert';
 
-export async function transformRotationAndPosition (
-  node: LayoutMixin,
+import { HasLayoutTrait, Rectangle, Transform } from '@figpot/src/clients/figma';
+import { ShapeBaseAttributes, ShapeGeomAttributes } from '@figpot/src/models/entities/penpot/shape';
+import { Point } from '@figpot/src/models/entities/penpot/traits/point';
+
+function getRotationAngle(transform: Transform) {
+  const cosAngle = transform[0][0];
+  const sinAngle = -transform[1][0];
+
+  const angle = Math.atan2(sinAngle, cosAngle);
+  const angleInDegrees = angle * (180 / Math.PI);
+
+  return angleInDegrees;
+}
+
+export function transformRotationAndPosition(
+  node: HasLayoutTrait,
   baseX: number,
   baseY: number
-): Pick<ShapeBaseAttributes, 'transform' | 'transformInverse' | 'rotation'> &
-  Pick<ShapeGeomAttributes, 'x' | 'y'> {
-  const rotation = node.rotation;
-  const x = node.x + baseX;
-  const y = node.y + baseY;
+): Pick<ShapeBaseAttributes, 'transform' | 'transformInverse' | 'rotation'> & Pick<ShapeGeomAttributes, 'x' | 'y'> {
+  assert(node.absoluteBoundingBox);
 
-  if (rotation === 0 || !node.absoluteBoundingBox) {
+  const x = node.absoluteBoundingBox.x + baseX;
+  const y = node.absoluteBoundingBox.y + baseY;
+
+  if (!node.relativeTransform) {
+    return {
+      x,
+      y,
+      rotation: 0,
+      transform: undefined,
+      transformInverse: undefined,
+    };
+  }
+
+  const rotation = getRotationAngle(node.relativeTransform);
+
+  if (rotation === 0) {
     return {
       x,
       y,
       rotation,
       transform: undefined,
-      transformInverse: undefined
+      transformInverse: undefined,
     };
   }
 
-  const point = getRotatedPoint({ x, y }, node.absoluteTransform, node.absoluteBoundingBox);
+  const point = getRotatedPoint({ x, y }, node.relativeTransform, node.absoluteBoundingBox);
 
   return {
     ...point,
     rotation: -rotation < 0 ? -rotation + 360 : -rotation,
     transform: {
-      a: node.absoluteTransform[0][0],
-      b: node.absoluteTransform[1][0],
-      c: node.absoluteTransform[0][1],
-      d: node.absoluteTransform[1][1],
+      a: node.relativeTransform[0][0],
+      b: node.relativeTransform[1][0],
+      c: node.relativeTransform[0][1],
+      d: node.relativeTransform[1][1],
       e: 0,
-      f: 0
+      f: 0,
     },
     transformInverse: {
-      a: node.absoluteTransform[0][0],
-      b: node.absoluteTransform[0][1],
-      c: node.absoluteTransform[1][0],
-      d: node.absoluteTransform[1][1],
+      a: node.relativeTransform[0][0],
+      b: node.relativeTransform[0][1],
+      c: node.relativeTransform[1][0],
+      d: node.relativeTransform[1][1],
       e: 0,
-      f: 0
-    }
+      f: 0,
+    },
   };
-};
+}
 
-const getRotatedPoint (point: Point, transform: Transform, boundingBox: Rect): Point {
+function getRotatedPoint(point: Point, transform: Transform, boundingBox: Rectangle): Point {
   const centerPoint = {
     x: boundingBox.x + boundingBox.width / 2,
-    y: boundingBox.y + boundingBox.height / 2
+    y: boundingBox.y + boundingBox.height / 2,
   };
 
   const relativePoint = {
     x: point.x - centerPoint.x,
-    y: point.y - centerPoint.y
+    y: point.y - centerPoint.y,
   };
 
   const rotatedPoint = {
     x: relativePoint.x * transform[0][0] + relativePoint.y * transform[1][0],
-    y: relativePoint.x * transform[0][1] + relativePoint.y * transform[1][1]
+    y: relativePoint.x * transform[0][1] + relativePoint.y * transform[1][1],
   };
 
   return {
     x: centerPoint.x + rotatedPoint.x,
-    y: centerPoint.y + rotatedPoint.y
+    y: centerPoint.y + rotatedPoint.y,
   };
-};
+}

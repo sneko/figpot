@@ -123,7 +123,7 @@ export async function compare(options: CompareOptionsType) {
     // We remove fields not meaningful and specific to Penpot and those that are dynamic (so it can be compared to the conversion from Figma)
     const hostedCoreDocument = {
       name: hostedDocument.name,
-      data: !!hostedDocument.data
+      data: hostedDocument.data
         ? {
             pagesIndex: (hostedDocument.data as any).pagesIndex,
           }

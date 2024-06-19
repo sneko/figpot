@@ -1,8 +1,10 @@
-import { calculateLinearGradient, rgbToHex } from '@plugin/utils';
-import { Fill } from '@ui/lib/types/utils/fill';
+import { GradientPaint } from '@figpot/src/clients/figma';
+import { Fill } from '@figpot/src/models/entities/penpot/traits/fill';
+import { rgbToHex } from '@figpot/src/utils/color';
+import { calculateLinearGradient } from '@figpot/src/utils/gradient';
 
 export function translateGradientLinearFill(fill: GradientPaint): Fill {
-  const points = calculateLinearGradient(fill.gradientTransform);
+  const points = calculateLinearGradient(fill.gradientHandlePositions);
 
   return {
     fillColorGradient: {

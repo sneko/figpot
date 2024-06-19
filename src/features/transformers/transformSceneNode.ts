@@ -48,6 +48,10 @@ export function transformSceneNode(registeredPageNodes: PenpotNode[], figmaNode:
     // case 'BOOLEAN_OPERATION':
     //   penpotNode = await transformBooleanNode(figmaNode, baseX, baseY);
     //   break;
+    // case 'CONNECTOR':
+    //   // TODO: implement it?
+    //   penpotNode = await transformConnectorNode(figmaNode, baseX, baseY);
+    //   break;
     // case 'COMPONENT':
     //   penpotNode = await transformComponentNode(figmaNode, baseX, baseY);
     //   break;
