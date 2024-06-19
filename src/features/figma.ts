@@ -1,8 +1,8 @@
 import { checkbox, input, select } from '@inquirer/prompts';
 import assert from 'assert';
 
-import { getProjectFiles, getTeamProjects } from '@figpot/src/clients/figma';
-import { DocumentOptionsType } from '@figpot/src/features/document';
+import { getFile, getProjectFiles, getTeamProjects } from '@figpot/src/clients/figma';
+import { DocumentOptionsType, getFigmaDocumentPath } from '@figpot/src/features/document';
 
 export function processDocumentsParametersFromInput(parameters: string[]): DocumentOptionsType[] {
   return parameters.map((parameter) => {
@@ -13,6 +13,17 @@ export function processDocumentsParametersFromInput(parameters: string[]): Docum
       penpotDocument: parts[1], // May be undefined if the user wants a new Penpot document
     };
   });
+}
+
+export async function retrieveDocument(documentId: string) {
+  const documentTree = await getFile({
+    fileKey: documentId,
+    geometry: 'paths', // Needed to have all properties into nodes
+  });
+
+  // TODO: write the meta.json file
+
+  return documentTree;
 }
 
 export async function retrieveDocumentsFromInput(): Promise<string[]> {
