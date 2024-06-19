@@ -1,4 +1,4 @@
-import { ShapeAttributes } from '@ui/lib/types/shapes/shape';
+import { ShapeAttributes } from '@figpot/src/models/entities/penpot/shape';
 
 export async function transformSceneNode(node: SceneNodeMixin): Pick<ShapeAttributes, 'blocked' | 'hidden'> {
   return {

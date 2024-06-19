@@ -2,6 +2,18 @@ import { checkbox, input, select } from '@inquirer/prompts';
 import assert from 'assert';
 
 import { getProjectFiles, getTeamProjects } from '@figpot/src/clients/figma';
+import { DocumentOptionsType } from '@figpot/src/features/document';
+
+export function processDocumentsParametersFromInput(parameters: string[]): DocumentOptionsType[] {
+  return parameters.map((parameter) => {
+    const parts = parameter.split(':');
+
+    return {
+      figmaDocument: parts[0],
+      penpotDocument: parts[1], // May be undefined if the user wants a new Penpot document
+    };
+  });
+}
 
 export async function retrieveDocumentsFromInput(): Promise<string[]> {
   // Teams cannot be gotten so expecting the user to precise it

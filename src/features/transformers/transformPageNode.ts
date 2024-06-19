@@ -87,12 +87,12 @@ export function transformPageNode(figmaNode: CanvasNode): PenpotPage {
     name: figmaNode.name,
   };
 
-  const flattenChildren: PenpotNode[] = [];
+  const registeredPageNodes: PenpotNode[] = [];
 
-  translateChildren(figmaNode.children, flattenChildren);
+  translateChildren(registeredPageNodes, figmaNode.children, figmaNode.id);
 
-  for (const child of flattenChildren) {
-    page.objects[child.id] = child;
+  for (const pageNode of registeredPageNodes) {
+    page.objects[pageNode.id] = pageNode;
   }
 
   return page;

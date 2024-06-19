@@ -5,15 +5,8 @@ import path from 'path';
 import { z } from 'zod';
 
 import { GetFileResponse, getFile } from '@figpot/src/clients/figma';
-import {
-  PostCommandGetFileResponse,
-  postCommandGetFile,
-  postCommandGetFileFragment,
-  postCommandGetPage,
-  postCommandGetProfile,
-  postCommandGetProjectFiles,
-} from '@figpot/src/clients/penpot';
-import { transformPageNode } from '@figpot/src/features/transformers/transformPageNode';
+import { PostCommandGetFileResponse, postCommandGetFile } from '@figpot/src/clients/penpot';
+import { transformDocumentNode } from '@figpot/src/features/transformers/transformDocumentNode';
 
 const __root_dirname = process.cwd();
 
@@ -21,8 +14,14 @@ export const documentsFolderPath = path.resolve(__root_dirname, './data/document
 export const fontsFolderPath = path.resolve(__root_dirname, './data/fonts/');
 export const mediasFolderPath = path.resolve(__root_dirname, './data/medias/');
 
+export const DocumentOptions = z.object({
+  figmaDocument: z.string(),
+  penpotDocument: z.string().optional(), // If empty a new file will be created
+});
+export type DocumentOptionsType = z.infer<typeof DocumentOptions>;
+
 export const RetrieveOptions = z.object({
-  figmaDocuments: z.array(z.string()),
+  documents: z.array(DocumentOptions),
 });
 export type RetrieveOptionsType = z.infer<typeof RetrieveOptions>;
 
@@ -35,20 +34,18 @@ export function getPenpotDocumentPath(figmaDocumentId: string, penpotDocumentId:
 }
 
 export async function retrieve(options: RetrieveOptionsType) {
-  const documents = options.figmaDocuments;
-
-  for (const documentId of documents) {
+  for (const document of options.documents) {
     // Save the document tree locally
-    const document = await getFile({
-      fileKey: documentId,
+    const documentTree = await getFile({
+      fileKey: document.figmaDocument,
       geometry: 'paths',
     });
 
-    const documentFolderPath = getFigmaDocumentPath(documentId);
+    const documentFolderPath = getFigmaDocumentPath(document.figmaDocument);
     await fs.mkdir(documentFolderPath, { recursive: true });
 
     const treePath = path.resolve(documentFolderPath, 'tree.json');
-    await fs.writeFile(treePath, JSON.stringify(document, null, 2));
+    await fs.writeFile(treePath, JSON.stringify(documentTree, null, 2));
 
     // Find all external references to get them too
     // aaa;
@@ -67,33 +64,28 @@ export async function retrieve(options: RetrieveOptionsType) {
 }
 
 export const TransformOptions = z.object({
-  figmaDocuments: z.array(z.string()),
-  penpotDocuments: z.array(z.string()).optional(),
+  documents: z.array(DocumentOptions),
 });
 export type TransformOptionsType = z.infer<typeof TransformOptions>;
 
 export async function transform(options: TransformOptionsType) {
-  const documents = options.figmaDocuments;
-
   // Go from the Figma format to the Penpot one
-  for (const documentId of documents) {
-    const documentFolderPath = path.resolve(documentsFolderPath, `figma_${documentId}`);
-    const treePath = path.resolve(documentFolderPath, 'tree.json');
+  for (const document of options.documents) {
+    const figmaDocumentFolderPath = path.resolve(documentsFolderPath, `figma_${document.figmaDocument}`);
+    const figmaTreePath = path.resolve(figmaDocumentFolderPath, 'tree.json');
 
-    const treeString = await fs.readFile(treePath, 'utf-8');
-    const tree = JSON.parse(treeString) as GetFileResponse; // We did not implement a zod schema, hoping they keep the structure stable enough
+    const figmaTreeString = await fs.readFile(figmaTreePath, 'utf-8');
+    const figmaTree = JSON.parse(figmaTreeString) as GetFileResponse; // We did not implement a zod schema, hoping they keep the structure stable enough
 
-    for (const pageNode of tree.document.children) {
-      const penpotPageNode = await transformPageNode(pageNode);
+    const penpotTree = await transformDocumentNode(figmaTree);
 
-      console.log(penpotPageNode);
-    }
+    const penpotTreePath = path.resolve(figmaDocumentFolderPath, 'transformed-tree.json');
+    await fs.writeFile(penpotTreePath, JSON.stringify(penpotTree, null, 2));
   }
 }
 
 export const CompareOptions = z.object({
-  figmaDocuments: z.array(z.string()),
-  penpotDocuments: z.array(z.string()).optional(),
+  documents: z.array(DocumentOptions),
 });
 export type CompareOptionsType = z.infer<typeof CompareOptions>;
 
@@ -101,52 +93,47 @@ export async function compare(options: CompareOptionsType) {
   // Take the Penpot one that has Figma node IDs and use the one from the mappings
   // Get documents from Penpot if already synchronized in the past
   // Calculate operations needed on the current hosted tree to match the Figma documents state
-
-  const figmaDocuments = options.figmaDocuments;
-  const penpotDocuments = options.penpotDocuments || [];
-
-  for (const figmaDocumentId of figmaDocuments) {
-    const figmaDocumentFolderPath = getFigmaDocumentPath(figmaDocumentId);
+  for (const document of options.documents) {
+    const figmaDocumentFolderPath = getFigmaDocumentPath(document.figmaDocument);
     let figmaDocumentFolderExists = fsSync.existsSync(figmaDocumentFolderPath);
 
     if (!figmaDocumentFolderExists) {
       throw new Error('figma document not existing locally, make sure to trigger commands in the right order');
+    } else if (!document.penpotDocument) {
+      throw new Error(
+        `TODO: should create a new document, and be sure it's passed to next function, or change the logic to return raw data, not just files`
+      );
     }
 
-    for (const penpotDocumentId of penpotDocuments) {
-      let document = await postCommandGetFile({
-        requestBody: {
-          id: penpotDocumentId,
-        },
-      });
+    let hostedDocument = await postCommandGetFile({
+      requestBody: {
+        id: document.penpotDocument,
+      },
+    });
 
-      // TODO: for now the response is kebab-case despite types, so forcing the conversion (ref: https://github.com/penpot/penpot/pull/4760#pullrequestreview-2125984653)
-      document = camelCase(document, Number.MAX_SAFE_INTEGER) as PostCommandGetFileResponse;
+    // TODO: for now the response is kebab-case despite types, so forcing the conversion (ref: https://github.com/penpot/penpot/pull/4760#pullrequestreview-2125984653)
+    hostedDocument = camelCase(hostedDocument, Number.MAX_SAFE_INTEGER) as PostCommandGetFileResponse;
 
-      const penpotDocumentFolderPath = getPenpotDocumentPath(figmaDocumentId, penpotDocumentId);
-      await fs.mkdir(penpotDocumentFolderPath, { recursive: true });
+    const penpotDocumentFolderPath = getPenpotDocumentPath(document.figmaDocument, document.penpotDocument);
+    await fs.mkdir(penpotDocumentFolderPath, { recursive: true });
 
-      const treePath = path.resolve(penpotDocumentFolderPath, 'hosted-tree.json');
-      await fs.writeFile(treePath, JSON.stringify(document, null, 2));
+    const treePath = path.resolve(penpotDocumentFolderPath, 'hosted-tree.json');
+    await fs.writeFile(treePath, JSON.stringify(hostedDocument, null, 2));
 
-      // We remove fields not meaningful and specific to Penpot and those that are dynamic (so it can be compared to the conversion from Figma)
-      const hostedCoreDocument = {
-        name: document.name,
-        data: !!document.data
-          ? {
-              pagesIndex: (document.data as any).pagesIndex,
-            }
-          : undefined,
-      };
-
-      const figmaTreePath = path.resolve(figmaDocumentFolderPath, 'tree.json');
-    }
+    // We remove fields not meaningful and specific to Penpot and those that are dynamic (so it can be compared to the conversion from Figma)
+    const hostedCoreDocument = {
+      name: hostedDocument.name,
+      data: !!hostedDocument.data
+        ? {
+            pagesIndex: (hostedDocument.data as any).pagesIndex,
+          }
+        : undefined,
+    };
   }
 }
 
 export const SetOptions = z.object({
-  figmaDocuments: z.array(z.string()),
-  penpotDocuments: z.array(z.string()).optional(),
+  documents: z.array(DocumentOptions),
 });
 export type SetOptionsType = z.infer<typeof SetOptions>;
 
@@ -155,8 +142,7 @@ export async function set(options: SetOptionsType) {
 }
 
 export const SynchronizeOptions = z.object({
-  figmaDocuments: z.array(z.string()),
-  penpotDocuments: z.array(z.string()).optional(),
+  documents: z.array(DocumentOptions),
 });
 export type SynchronizeOptionsType = z.infer<typeof SynchronizeOptions>;
 

@@ -1,5 +1,5 @@
 import { SubcanvasNode } from '@figpot/src/clients/figma';
-import { ShapeBaseAttributes } from '@figpot/src/features/penpot';
+import { ShapeBaseAttributes } from '@figpot/src/models/entities/penpot/shape';
 
 export function transformFigmaIds(node: SubcanvasNode): Pick<ShapeBaseAttributes, 'figmaId' | 'figmaRelatedId'> {
   return {

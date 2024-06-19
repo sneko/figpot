@@ -1,5 +1,5 @@
-import { ShapeBaseAttributes, ShapeGeomAttributes } from '@ui/lib/types/shapes/shape';
-import { Point } from '@ui/lib/types/utils/point';
+import { ShapeBaseAttributes, ShapeGeomAttributes } from "@figpot/src/models/entities/penpot/shape";
+import { Point } from "@figpot/src/models/entities/penpot/traits/point";
 
 export async function transformRotationAndPosition (
   node: LayoutMixin,

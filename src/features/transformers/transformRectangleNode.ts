@@ -16,17 +16,17 @@ export function transformRectangleNode(node: RectangleNode, baseX: number, baseY
   return {
     type: 'rect',
     name: node.name,
-    ...transformFigmaIds(node),
+    // TODO:
+    // ...transformFigmaIds(node),
     ...transformFills(node),
-    ...transformEffects(node),
-    ...transformStrokes(node),
+    // ...transformEffects(node),
+    // ...transformStrokes(node),
     ...transformDimension(node),
     ...transformRotationAndPosition(node, baseX, baseY),
-    ...transformSceneNode(node),
-    ...transformBlend(node),
-    ...transformProportion(node),
-    // TODO:
+    // ...transformSceneNode(node),
+    // ...transformBlend(node),
+    // ...transformProportion(node),
     // ...transformCornerRadius(node),
-    ...transformConstraints(node),
+    // ...transformConstraints(node),
   };
 }

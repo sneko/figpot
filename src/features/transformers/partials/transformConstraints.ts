@@ -1,6 +1,6 @@
 import { HasLayoutTrait } from '@figpot/src/clients/figma';
-import { ShapeAttributes } from '@figpot/src/features/penpot';
 import { translateConstraintH, translateConstraintV } from '@figpot/src/features/translators/translateConstraints';
+import { ShapeAttributes } from '@figpot/src/models/entities/penpot/shape';
 
 export function transformConstraints(node: HasLayoutTrait): Pick<ShapeAttributes, 'constraintsH' | 'constraintsV'> {
   return {

@@ -15,49 +15,49 @@ import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 //   transformVectorNode,
 // } from '.';
 
-export function transformSceneNode(node: SubcanvasNode, baseX: number = 0, baseY: number = 0): Promise<PenpotNode | undefined> {
-  let penpotNode: PenpotNode | undefined;
+export function transformSceneNode(registeredPageNodes: PenpotNode[], figmaNode: SubcanvasNode, baseX: number = 0, baseY: number = 0): PenpotNode {
+  let penpotNode: PenpotNode;
 
-  switch (node.type) {
+  switch (figmaNode.type) {
     case 'RECTANGLE':
-      penpotNode = transformRectangleNode(node, baseX, baseY);
+      penpotNode = transformRectangleNode(figmaNode, baseX, baseY);
       break;
     // case 'ELLIPSE':
-    //   penpotNode = transformEllipseNode(node, baseX, baseY);
+    //   penpotNode = transformEllipseNode(figmaNode, baseX, baseY);
     //   break;
     // case 'SECTION':
     // case 'FRAME':
     // case 'COMPONENT_SET':
-    //   penpotNode = await transformFrameNode(node, baseX, baseY);
+    //   penpotNode = await transformFrameNode(figmaNode, baseX, baseY);
     //   break;
     // case 'GROUP':
-    //   penpotNode = await transformGroupNode(node, baseX, baseY);
+    //   penpotNode = await transformGroupNode(figmaNode, baseX, baseY);
     //   break;
     // case 'TEXT':
-    //   penpotNode = transformTextNode(node, baseX, baseY);
+    //   penpotNode = transformTextNode(figmaNode, baseX, baseY);
     //   break;
     // case 'VECTOR':
-    //   penpotNode = transformVectorNode(node, baseX, baseY);
+    //   penpotNode = transformVectorNode(figmaNode, baseX, baseY);
     //   break;
     // case 'STAR':
     // // case 'POLYGON':
     // case 'REGULAR_POLYGON':
     // case 'LINE':
-    //   penpotNode = transformPathNode(node, baseX, baseY);
+    //   penpotNode = transformPathNode(figmaNode, baseX, baseY);
     //   break;
     // case 'BOOLEAN_OPERATION':
-    //   penpotNode = await transformBooleanNode(node, baseX, baseY);
+    //   penpotNode = await transformBooleanNode(figmaNode, baseX, baseY);
     //   break;
     // case 'COMPONENT':
-    //   penpotNode = await transformComponentNode(node, baseX, baseY);
+    //   penpotNode = await transformComponentNode(figmaNode, baseX, baseY);
     //   break;
     // case 'INSTANCE':
-    //   penpotNode = await transformInstanceNode(node, baseX, baseY);
+    //   penpotNode = await transformInstanceNode(figmaNode, baseX, baseY);
     //   break;
   }
 
   if (penpotNode === undefined) {
-    console.error(`Unsupported node type: ${node.type}`);
+    throw new Error(`Unsupported Figma node type: ${figmaNode.type}`);
   }
 
   return penpotNode;

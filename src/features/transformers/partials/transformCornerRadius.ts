@@ -1,5 +1,3 @@
-import { ShapeAttributes } from '@figpot/src/features/penpot';
-
 // TODO: must be tested to implement and find correct typings...
 
 // function isRectangleCornerMixin(node: CornerMixin | (CornerMixin & RectangleCornerMixin)): node is CornerMixin & RectangleCornerMixin {
