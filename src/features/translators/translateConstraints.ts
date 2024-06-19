@@ -1,5 +1,5 @@
 import { LayoutConstraint } from '@figpot/src/clients/figma';
-import { ConstraintH, ConstraintV } from '@figpot/src/features/penpot';
+import { ConstraintH, ConstraintV } from '@figpot/src/models/entities/penpot/shape';
 
 export const translateConstraintH = (constraint: LayoutConstraint['horizontal']): ConstraintH => {
   switch (constraint) {

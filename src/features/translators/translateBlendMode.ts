@@ -1,5 +1,5 @@
 import { BlendMode } from '@figpot/src/clients/figma';
-import { BlendMode as PenpotBlendMode } from '@figpot/src/features/penpot';
+import { BlendMode as PenpotBlendMode } from '@figpot/src/models/entities/penpot/traits/blendModes';
 
 export function translateBlendMode(blendMode: BlendMode): PenpotBlendMode {
   switch (blendMode) {

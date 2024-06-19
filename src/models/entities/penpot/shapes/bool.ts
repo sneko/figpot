@@ -1,9 +1,8 @@
-import { LayoutChildAttributes } from '@ui/lib/types/shapes/layout';
-import { PathContent } from '@ui/lib/types/shapes/pathShape';
-import { ShapeAttributes, ShapeBaseAttributes } from '@ui/lib/types/shapes/shape';
-import { Children } from '@ui/lib/types/utils/children';
-import { Point } from '@ui/lib/types/utils/point';
-import { Uuid } from '@ui/lib/types/utils/uuid';
+import { LayoutChildAttributes } from '@figpot/src/models/entities/penpot/layout';
+import { ShapeAttributes, ShapeBaseAttributes } from '@figpot/src/models/entities/penpot/shape';
+import { PathContent } from '@figpot/src/models/entities/penpot/shapes/path';
+import { Point } from '@figpot/src/models/entities/penpot/traits/point';
+import { Uuid } from '@figpot/src/models/entities/penpot/traits/uuid';
 
 export const BOOL_DIFFERENCE: unique symbol = Symbol.for('difference');
 export const BOOL_UNION: unique symbol = Symbol.for('union');
@@ -20,11 +19,7 @@ export type BoolOperations =
   | typeof BOOL_INTERSECTION
   | typeof BOOL_EXCLUDE;
 
-export type BoolShape = ShapeBaseAttributes &
-  ShapeAttributes &
-  BoolAttributes &
-  LayoutChildAttributes &
-  Children;
+export type BoolShape = ShapeBaseAttributes & ShapeAttributes & BoolAttributes & LayoutChildAttributes;
 
 type BoolAttributes = {
   type?: 'bool';

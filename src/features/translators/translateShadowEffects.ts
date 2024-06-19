@@ -1,8 +1,10 @@
-import { rgbToHex } from '@plugin/utils';
+import assert from 'assert';
 
-import { Shadow, ShadowStyle } from '@ui/lib/types/utils/shadow';
+import { DropShadowEffect, Effect, InnerShadowEffect } from '@figpot/src/clients/figma';
+import { Shadow, ShadowStyle } from '@figpot/src/models/entities/penpot/traits/shadow';
+import { rgbToHex } from '@figpot/src/utils/color';
 
-export const translateShadowEffect = (effect: Effect): Shadow | undefined => {
+export function translateShadowEffect(effect: Effect): Shadow | undefined {
   if (effect.type !== 'DROP_SHADOW' && effect.type !== 'INNER_SHADOW') {
     return;
   }
@@ -16,12 +18,12 @@ export const translateShadowEffect = (effect: Effect): Shadow | undefined => {
     hidden: !effect.visible,
     color: {
       color: rgbToHex(effect.color),
-      opacity: effect.color.a
-    }
+      opacity: effect.color.a,
+    },
   };
-};
+}
 
-export const translateShadowEffects = (effects: readonly Effect[]): Shadow[] => {
+export function translateShadowEffects(effects: readonly Effect[]): Shadow[] {
   const shadows: Shadow[] = [];
 
   for (const effect of effects) {
@@ -33,13 +35,15 @@ export const translateShadowEffects = (effects: readonly Effect[]): Shadow[] => 
   }
 
   return shadows;
-};
+}
 
-const translateShadowType = (effect: DropShadowEffect | InnerShadowEffect): ShadowStyle => {
+function translateShadowType(effect: DropShadowEffect | InnerShadowEffect): ShadowStyle {
+  assert(effect.type);
+
   switch (effect.type) {
     case 'DROP_SHADOW':
       return 'drop-shadow';
     case 'INNER_SHADOW':
       return 'inner-shadow';
   }
-};
+}

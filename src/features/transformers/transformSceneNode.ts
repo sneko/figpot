@@ -16,7 +16,7 @@ import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 // } from '.';
 
 export function transformSceneNode(registeredPageNodes: PenpotNode[], figmaNode: SubcanvasNode, baseX: number = 0, baseY: number = 0): PenpotNode {
-  let penpotNode: PenpotNode;
+  let penpotNode: PenpotNode | undefined;
 
   switch (figmaNode.type) {
     case 'RECTANGLE':

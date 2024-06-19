@@ -1,15 +1,7 @@
-import { LayoutChildAttributes } from '@ui/lib/types/shapes/layout';
-import {
-  ShapeAttributes,
-  ShapeBaseAttributes,
-  ShapeGeomAttributes
-} from '@ui/lib/types/shapes/shape';
+import { LayoutChildAttributes } from '@figpot/src/models/entities/penpot/layout';
+import { ShapeAttributes, ShapeBaseAttributes, ShapeGeomAttributes } from '@figpot/src/models/entities/penpot/shape';
 
-export type CircleShape = ShapeBaseAttributes &
-  ShapeGeomAttributes &
-  ShapeAttributes &
-  CircleAttributes &
-  LayoutChildAttributes;
+export type CircleShape = ShapeBaseAttributes & ShapeGeomAttributes & ShapeAttributes & CircleAttributes & LayoutChildAttributes;
 
 type CircleAttributes = {
   type?: 'circle';
