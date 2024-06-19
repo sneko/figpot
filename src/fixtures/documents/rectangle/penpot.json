@@ -89,7 +89,7 @@
             "proportion": 1,
             "fills": [
               {
-                "fillColor": "#FFFFFF",
+                "fillColor": "#ff0000",
                 "fillOpacity": 1
               }
             ],

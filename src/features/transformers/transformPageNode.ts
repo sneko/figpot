@@ -1,10 +1,11 @@
 import { CanvasNode } from '@figpot/src/clients/figma';
+import { MappingType } from '@figpot/src/features/document';
 import { translateChildren } from '@figpot/src/features/translators/translateChildren';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { rgbToHex } from '@figpot/src/utils/color';
 
-export function transformPageNode(figmaNode: CanvasNode): PenpotPage {
+export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | null): PenpotPage {
   //
   // TODO: we should strip properties of Penpot features like `proportionLock`
   // to be sure it does not trigger a useless update
@@ -93,6 +94,12 @@ export function transformPageNode(figmaNode: CanvasNode): PenpotPage {
 
   for (const pageNode of registeredPageNodes) {
     if (pageNode.id) {
+      const mappedId = mapping?.nodes[pageNode.id] || null;
+      if (mappedId) {
+        // In case there is a binding, the node will be created since not in the mapping pairs
+        pageNode.id = mappedId;
+      }
+
       page.objects[pageNode.id] = pageNode;
     }
   }

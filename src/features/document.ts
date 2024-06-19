@@ -21,18 +21,15 @@ export const documentsFolderPath = path.resolve(__root_dirname, './data/document
 export const fontsFolderPath = path.resolve(__root_dirname, './data/fonts/');
 export const mediasFolderPath = path.resolve(__root_dirname, './data/medias/');
 
-export const MappingPair = z.object({
-  figmaId: z.string(),
-  penpotId: z.string(),
-});
-export type MappingPairType = z.infer<typeof MappingPair>;
+export const FigmaToPenpotMapping = z.record(z.string(), z.string());
+export type FigmaToPenpotMappingType = z.infer<typeof FigmaToPenpotMapping>;
 
 export const Mapping = z.object({
   lastExport: z.date(),
-  fonts: z.array(MappingPair),
-  assets: z.array(MappingPair),
-  nodes: z.array(MappingPair),
-  documents: z.array(MappingPair),
+  fonts: FigmaToPenpotMapping,
+  assets: FigmaToPenpotMapping,
+  nodes: FigmaToPenpotMapping,
+  documents: FigmaToPenpotMapping,
 });
 export type MappingType = z.infer<typeof Mapping>;
 
@@ -145,9 +142,9 @@ export async function sortDocuments(documents: DocumentOptionsType[]): Promise<D
   return documents;
 }
 
-export async function transformDocument(documentTree: GetFileResponse, mapping: MappingType | null) {
+export function transformDocument(documentTree: GetFileResponse, mapping: MappingType | null) {
   // Go from the Figma format to the Penpot one
-  const penpotTree = await transformDocumentNode(documentTree);
+  const penpotTree = transformDocumentNode(documentTree, mapping);
 
   return penpotTree;
 }
@@ -184,7 +181,7 @@ export async function transform(options: TransformOptionsType) {
       }
     }
 
-    const penpotTree = await transformDocument(figmaTree, mapping);
+    const penpotTree = transformDocument(figmaTree, mapping);
 
     // TODO: if mapping here, put the file into Penport, but have to create
     // await fs.writeFile(getTransformedFigmaTreePath(document.figmaDocument, document.penpotDocument), JSON.stringify(penpotTree, null, 2));
@@ -192,7 +189,7 @@ export async function transform(options: TransformOptionsType) {
   }
 }
 
-export function getDifferences(currentTree: any, newTree: any): unknown[] {
+export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocument): unknown[] {
   throw 'TO IMPLEMENT';
 }
 

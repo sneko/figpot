@@ -21,7 +21,7 @@ export async function retrieveDocument(documentId: string) {
     geometry: 'paths', // Needed to have all properties into nodes
   });
 
-  // TODO: write the meta.json file
+  // TODO: return the metadata
 
   return documentTree;
 }

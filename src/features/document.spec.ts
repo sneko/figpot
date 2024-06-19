@@ -9,35 +9,32 @@ describe('document comparaison', () => {
     it('should be equivalent', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: [],
-        documents: [],
-        fonts: [],
-        nodes: [
-          {
-            figmaId: '0:0',
-            penpotId: '00000000-0000-0000-0000-000000000000',
-          },
-          {
-            figmaId: '0:1',
-            penpotId: '4bf0e9f6-08c8-809c-8004-85445179c2aa',
-          },
-        ],
+        assets: {},
+        documents: {},
+        fonts: {},
+        nodes: {
+          '0:0': '00000000-0000-0000-0000-000000000000',
+          '0:1': '4bf0e9f6-08c8-809c-8004-85445179c2aa',
+        },
       };
 
       const transformedTree = transformDocument(emptyFigmaTree as GetFileResponse, mapping);
       const cleanHostedTree = cleanHostedDocument(emptyPenpotTree);
-      const diff = getDifferences(cleanHostedTree, transformedTree);
 
-      expect(diff).toBeNull();
+      expect(transformedTree).toEqual(cleanHostedTree);
+
+      // const diff = getDifferences(cleanHostedTree, transformedTree);
+
+      // expect(diff).toBeNull();
     });
 
     it('should require creation on penpot', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: [],
-        documents: [],
-        fonts: [],
-        nodes: [],
+        assets: {},
+        documents: {},
+        fonts: {},
+        nodes: {},
       };
 
       const transformedTree = transformDocument(emptyFigmaTree as GetFileResponse, mapping);
