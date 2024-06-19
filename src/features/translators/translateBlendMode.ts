@@ -3,11 +3,11 @@ import { BlendMode as PenpotBlendMode } from '@figpot/src/models/entities/penpot
 
 export function translateBlendMode(blendMode: BlendMode): PenpotBlendMode {
   switch (blendMode) {
-    //@TODO: is not translatable in penpot, this is the closest one
+    // TODO: is not translatable in penpot, this is the closest one
     case 'PASS_THROUGH':
     case 'NORMAL':
       return 'normal';
-    //@TODO: is not translatable in penpot, this is the closest one
+    // TODO: is not translatable in penpot, this is the closest one
     case 'LINEAR_BURN':
     case 'DARKEN':
       return 'darken';
@@ -19,7 +19,7 @@ export function translateBlendMode(blendMode: BlendMode): PenpotBlendMode {
       return 'lighten';
     case 'SCREEN':
       return 'screen';
-    //@TODO: is not translatable in penpot, this is the closest one
+    // TODO: is not translatable in penpot, this is the closest one
     case 'LINEAR_DODGE':
     case 'COLOR_DODGE':
       return 'color-dodge';

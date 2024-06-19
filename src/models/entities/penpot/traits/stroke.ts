@@ -1,5 +1,5 @@
 import { Gradient } from '@figpot/src/models/entities/penpot/traits/gradient';
-import { ImageColor, PartialImageColor } from '@figpot/src/models/entities/penpot/traits/imageColor';
+import { ImageColor } from '@figpot/src/models/entities/penpot/traits/imageColor';
 import { Uuid } from '@figpot/src/models/entities/penpot/traits/uuid';
 
 export type StrokeAlignment = 'center' | 'inner' | 'outer';
@@ -20,5 +20,5 @@ export type Stroke = {
   strokeCapStart?: StrokeCaps;
   strokeCapEnd?: StrokeCaps;
   strokeColorGradient?: Gradient;
-  strokeImage?: ImageColor | PartialImageColor;
+  strokeImage?: ImageColor;
 };

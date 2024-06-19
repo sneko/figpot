@@ -1,5 +1,5 @@
 import { Gradient } from '@figpot/src/models/entities/penpot/traits/gradient';
-import { ImageColor, PartialImageColor } from '@figpot/src/models/entities/penpot/traits/imageColor';
+import { ImageColor } from '@figpot/src/models/entities/penpot/traits/imageColor';
 import { Uuid } from '@figpot/src/models/entities/penpot/traits/uuid';
 
 export type Fill = {
@@ -8,5 +8,5 @@ export type Fill = {
   fillColorGradient?: Gradient;
   fillColorRefFile?: Uuid;
   fillColorRefId?: Uuid;
-  fillImage?: ImageColor | PartialImageColor; // @TODO: move to any other place
+  fillImage?: ImageColor;
 };
