@@ -42,9 +42,14 @@ describe('document comparaison', () => {
 
       expect(transformedTree).not.toEqual(cleanHostedTree);
 
-      const diff = getDifferences(cleanHostedTree, transformedTree);
+      const differences = getDifferences(cleanHostedTree, transformedTree);
 
-      // expect(diff).not.toBeNull();
+      // console.log(JSON.stringify(cleanHostedTree));
+      console.log(JSON.stringify(differences));
+
+      expect(differences.newDocumentName).not.toBeNull();
+      expect(differences.newTreeOperations.length).toBe(3);
+      expect(differences.newTreeOperations.map((op) => op.type)).toEqual(['add-page', 'mod-obj', 'del-page']);
     });
   });
 });

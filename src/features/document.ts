@@ -207,29 +207,6 @@ export async function transform(options: TransformOptionsType) {
   }
 }
 
-export function aaa(currentTree: PenpotDocument, newTree: PenpotDocument): unknown[] {
-  // .postCommandUpdateFile({
-  //   requestBody: {
-  //     id: documentId,
-  //     revn: 1, // TODO: how to get it? From the hosted object and keep in the mapping?
-  //     sessionId: '', // TODO: mandatory, what to set?
-  //     changes: [],
-  //   },
-  // });
-
-  // TODO: where to change the name async?
-  // if (currentTree.name !== newTree.name) {
-  //   await postCommandRenameFile({
-  //     requestBody: {
-  //       id: documentId,
-  //       name: newTree.name,
-  //     }
-  //   });
-  // }
-
-  return [];
-}
-
 export interface Differences {
   newDocumentName?: string;
   newTreeOperations: appCommonFilesChanges$change[];
@@ -272,7 +249,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
     };
 
     flattenNewGlobalTree.set(litePageNode.id, litePageNode);
-    newGraph.setNode(litePageNode.id, true); // The content has no sense since we will take if from the diff
+    newGraph.setNode(litePageNode.id, true); // No care about the content since we will take if from the diff
 
     for (const newNode of Object.values(newPageNode.objects)) {
       const liteNode: LiteNode = {
@@ -284,12 +261,12 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       assert(liteNode.id);
       assert(liteNode.parentId);
 
-      flattenCurrentGlobalTree.set(liteNode.id, liteNode);
-      newGraph.setNode(liteNode.id, true); // The content has no sense since we will take if from the diff
+      flattenNewGlobalTree.set(liteNode.id, liteNode);
+      newGraph.setNode(liteNode.id, true); // No care about the content since we will take if from the diff
 
       // Trying to add the edge between 2 nodes, if not existing it will "pre-create" the node without content
       // And into the next iterations (since all must be in the list) it will add the needed node content (it avoids looping 2 times)
-      newGraph.setEdge(liteNode.id, liteNode._realPageParentId || liteNode.parentId);
+      newGraph.setEdge(liteNode._realPageParentId || liteNode.parentId, liteNode.id);
     }
   }
 
@@ -299,60 +276,62 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
 
   const operations: appCommonFilesChanges$change[] = [];
 
-  const browse = (graphParentNodeId: string, penpotParentNodeId?: string) => {
-    const children = newGraph.children(graphParentNodeId);
+  const browse = (graphNodeId: string) => {
+    const item = diffResult.get(graphNodeId);
 
-    for (const childId of children) {
-      const item = diffResult.get(childId);
+    assert(item);
 
-      assert(item);
+    if (item.state === 'added') {
+      assert(item.after.id);
 
-      if (item.state === 'added') {
-        assert(item.after.id);
+      if (item.after._apiType === 'page') {
+        operations.push({
+          type: 'add-page',
+          id: item.after.id, // Penpot allows forcing the ID at creation
+          name: item.after.name,
+        });
+      } else if (item.after._apiType === 'node') {
+        const { _apiType, _realPageParentId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
 
-        if (item.after._apiType === 'page') {
-          operations.push({
-            type: 'add-page',
-            id: item.after.id, // Penpot allows forcing the ID at creation
-            name: item.after.name,
-          });
-        } else if (item.after._apiType === 'node') {
-          const { _apiType, _realPageParentId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
-
-          operations.push({
-            type: 'add-obj',
-            id: item.after.id, // Penpot allows forcing the ID at creation
-            pageId: item.after._realPageParentId || undefined,
-            frameId: item.after.frameId,
-            parentId: item.after.parentId,
-            obj: propertiesObj,
-          });
-        }
-      } else if (item.state === 'updated') {
-        if (item.after._apiType === 'page') {
-          operations.push({
-            type: 'mod-page',
-            id: item.after.id,
-            name: item.after.name,
-          });
-        } else if (item.after._apiType === 'node') {
-          const { _apiType, _realPageParentId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
-
-          operations.push({
-            type: 'mod-obj',
-            id: item.after.id,
-            operations: Object.entries(propertiesObj).map(([property, value]) => {
-              return {
-                type: 'set',
-                attr: property,
-                val: value,
-              };
-            }),
-          });
-        }
+        operations.push({
+          type: 'add-obj',
+          id: item.after.id, // Penpot allows forcing the ID at creation
+          pageId: item.after._realPageParentId || undefined,
+          frameId: item.after.frameId,
+          parentId: item.after.parentId,
+          obj: propertiesObj,
+        });
       }
+    } else if (item.state === 'updated') {
+      if (item.after._apiType === 'page') {
+        operations.push({
+          type: 'mod-page',
+          id: item.after.id,
+          name: item.after.name,
+        });
+      } else if (item.after._apiType === 'node') {
+        const { _apiType, _realPageParentId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 
-      browse(childId);
+        operations.push({
+          type: 'mod-obj',
+          id: item.after.id,
+          operations: Object.entries(propertiesObj).map(([property, value]) => {
+            return {
+              type: 'set',
+              attr: property,
+              val: value,
+            };
+          }),
+        });
+      }
+    }
+
+    const children = newGraph.successors(graphNodeId);
+
+    if (children && children?.length > 0) {
+      for (const childId of children) {
+        browse(childId);
+      }
     }
   };
 
@@ -428,9 +407,26 @@ export async function compare(options: CompareOptionsType) {
   }
 }
 
-export async function processOperations(operations: any[]) {
-  // Adjust local mapping with deleted/modified/created nodes
-  // TODO: ...
+export async function processDifferences(penpotDocumentId: string, differences: Differences) {
+  if (differences.newDocumentName) {
+    await postCommandRenameFile({
+      requestBody: {
+        id: penpotDocumentId,
+        name: differences.newDocumentName,
+      },
+    });
+  }
+
+  if (differences.newTreeOperations.length > 0) {
+    await postCommandUpdateFile({
+      requestBody: {
+        id: penpotDocumentId,
+        revn: 1, // TODO: how to get it? From the hosted object and keep in the mapping?
+        sessionId: '', // TODO: mandatory, what to set?
+        changes: differences.newTreeOperations,
+      },
+    });
+  }
 }
 
 export const SetOptions = z.object({

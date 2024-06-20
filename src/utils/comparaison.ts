@@ -73,7 +73,7 @@ export function getDiff<Model extends Record<ReferenceProperty, any>, ReferenceP
   return result;
 }
 
-export function formatDiffResultLog<ReferenceProperty, Model>(result: GetDiffResults<ReferenceProperty, Model>) {
+export function getDiffCounts<ReferenceProperty, Model>(result: GetDiffResults<ReferenceProperty, Model>) {
   const counts = {
     added: 0,
     removed: 0,
@@ -98,6 +98,12 @@ export function formatDiffResultLog<ReferenceProperty, Model>(result: GetDiffRes
         break;
     }
   }
+
+  return counts;
+}
+
+export function formatDiffResultLog<ReferenceProperty, Model>(result: GetDiffResults<ReferenceProperty, Model>) {
+  const counts = getDiffCounts(result);
 
   return `added: ${counts.added} | removed: ${counts.removed} | updated: ${counts.updated} | unchanged: ${counts.unchanged}`;
 }
