@@ -3,14 +3,25 @@ import assert from 'assert';
 import { camelCase } from 'change-case/keys';
 import fsSync from 'fs';
 import fs from 'fs/promises';
+import graphlib, { Graph } from 'graphlib';
 import path from 'path';
+import { Digraph, toDot } from 'ts-graphviz';
+import { toFile } from 'ts-graphviz/adapter';
 import { z } from 'zod';
 
 import { GetFileResponse } from '@figpot/src/clients/figma';
-import { PostCommandGetFileResponse, postCommandGetFile } from '@figpot/src/clients/penpot';
+import {
+  PostCommandGetFileResponse,
+  appCommonFilesChanges$change,
+  postCommandGetFile,
+  postCommandRenameFile,
+  postCommandUpdateFile,
+} from '@figpot/src/clients/penpot';
 import { retrieveDocument } from '@figpot/src/features/figma';
 import { transformDocumentNode } from '@figpot/src/features/transformers/transformDocumentNode';
 import { PenpotDocument } from '@figpot/src/models/entities/penpot/document';
+import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
+import { formatDiffResultLog, getDiff } from '@figpot/src/utils/comparaison';
 import { gracefulExit } from '@figpot/src/utils/system';
 
 import { cleanHostedDocument } from './penpot';
@@ -23,6 +34,13 @@ export const mediasFolderPath = path.resolve(__root_dirname, './data/medias/');
 
 export const FigmaToPenpotMapping = z.record(z.string(), z.string());
 export type FigmaToPenpotMappingType = z.infer<typeof FigmaToPenpotMapping>;
+
+export type LitePageNode = Pick<PenpotDocument['data']['pagesIndex'][0], 'id' | 'name'> & { _apiType: 'page' };
+export type LiteNode = PenpotNode & {
+  _apiType: 'node';
+  _realPageParentId: string | null; // Needed since main frame inside a page has as parent itself (which complicates things for our graph usage)
+};
+export type NodeLabel = LitePageNode | LiteNode;
 
 export const Mapping = z.object({
   lastExport: z.date(),
@@ -189,8 +207,181 @@ export async function transform(options: TransformOptionsType) {
   }
 }
 
-export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocument): unknown[] {
-  throw 'TO IMPLEMENT';
+export function aaa(currentTree: PenpotDocument, newTree: PenpotDocument): unknown[] {
+  // .postCommandUpdateFile({
+  //   requestBody: {
+  //     id: documentId,
+  //     revn: 1, // TODO: how to get it? From the hosted object and keep in the mapping?
+  //     sessionId: '', // TODO: mandatory, what to set?
+  //     changes: [],
+  //   },
+  // });
+
+  // TODO: where to change the name async?
+  // if (currentTree.name !== newTree.name) {
+  //   await postCommandRenameFile({
+  //     requestBody: {
+  //       id: documentId,
+  //       name: newTree.name,
+  //     }
+  //   });
+  // }
+
+  return [];
+}
+
+export interface Differences {
+  newDocumentName?: string;
+  newTreeOperations: appCommonFilesChanges$change[];
+}
+
+export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocument): Differences {
+  const newDocumentName = currentTree.name !== newTree.name ? newTree.name : undefined;
+
+  // Flatten for comparaison (easier to get the differences of add/delete/modify/idle on the entire document)
+  const flattenCurrentGlobalTree = new Map<string, NodeLabel>();
+  const flattenNewGlobalTree: typeof flattenCurrentGlobalTree = new Map();
+
+  // Below we use a graph logic to operate in the right order nodes (since moving/deleting/adding one can imply other)
+  // [IMPORTANT] Edge `from` is the child whereas `to` is the parent
+  const newGraph = new Graph();
+
+  for (const currentPageNode of Object.values(currentTree.data.pagesIndex)) {
+    flattenCurrentGlobalTree.set(currentPageNode.id, {
+      _apiType: 'page',
+      id: currentPageNode.id,
+      name: currentPageNode.name,
+    } as LitePageNode);
+
+    for (const currentNode of Object.values(currentPageNode.objects)) {
+      assert(currentNode.id);
+
+      flattenCurrentGlobalTree.set(currentNode.id, {
+        _apiType: 'node',
+        _realPageParentId: currentNode.id === currentNode.parentId ? currentPageNode.id : null,
+        ...currentNode,
+      } as LiteNode);
+    }
+  }
+
+  for (const newPageNode of Object.values(newTree.data.pagesIndex)) {
+    const litePageNode: LitePageNode = {
+      _apiType: 'page',
+      id: newPageNode.id,
+      name: newPageNode.name,
+    };
+
+    flattenNewGlobalTree.set(litePageNode.id, litePageNode);
+    newGraph.setNode(litePageNode.id, true); // The content has no sense since we will take if from the diff
+
+    for (const newNode of Object.values(newPageNode.objects)) {
+      const liteNode: LiteNode = {
+        _apiType: 'node',
+        _realPageParentId: newNode.id === newNode.parentId ? newPageNode.id : null,
+        ...newNode,
+      };
+
+      assert(liteNode.id);
+      assert(liteNode.parentId);
+
+      flattenCurrentGlobalTree.set(liteNode.id, liteNode);
+      newGraph.setNode(liteNode.id, true); // The content has no sense since we will take if from the diff
+
+      // Trying to add the edge between 2 nodes, if not existing it will "pre-create" the node without content
+      // And into the next iterations (since all must be in the list) it will add the needed node content (it avoids looping 2 times)
+      newGraph.setEdge(liteNode.id, liteNode._realPageParentId || liteNode.parentId);
+    }
+  }
+
+  const diffResult = getDiff(flattenCurrentGlobalTree, flattenNewGlobalTree);
+
+  console.log(formatDiffResultLog(diffResult));
+
+  const operations: appCommonFilesChanges$change[] = [];
+
+  const browse = (graphParentNodeId: string, penpotParentNodeId?: string) => {
+    const children = newGraph.children(graphParentNodeId);
+
+    for (const childId of children) {
+      const item = diffResult.get(childId);
+
+      assert(item);
+
+      if (item.state === 'added') {
+        assert(item.after.id);
+
+        if (item.after._apiType === 'page') {
+          operations.push({
+            type: 'add-page',
+            id: item.after.id, // Penpot allows forcing the ID at creation
+            name: item.after.name,
+          });
+        } else if (item.after._apiType === 'node') {
+          const { _apiType, _realPageParentId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
+
+          operations.push({
+            type: 'add-obj',
+            id: item.after.id, // Penpot allows forcing the ID at creation
+            pageId: item.after._realPageParentId || undefined,
+            frameId: item.after.frameId,
+            parentId: item.after.parentId,
+            obj: propertiesObj,
+          });
+        }
+      } else if (item.state === 'updated') {
+        if (item.after._apiType === 'page') {
+          operations.push({
+            type: 'mod-page',
+            id: item.after.id,
+            name: item.after.name,
+          });
+        } else if (item.after._apiType === 'node') {
+          const { _apiType, _realPageParentId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
+
+          operations.push({
+            type: 'mod-obj',
+            id: item.after.id,
+            operations: Object.entries(propertiesObj).map(([property, value]) => {
+              return {
+                type: 'set',
+                attr: property,
+                val: value,
+              };
+            }),
+          });
+        }
+      }
+
+      browse(childId);
+    }
+  };
+
+  const sourcesIds = newGraph.sources();
+  for (const sourceId of sourcesIds) {
+    browse(sourceId);
+  }
+
+  // Delete others (those should be orphan into the document now)
+  for (const [, item] of diffResult) {
+    if (item.state === 'removed') {
+      if (item.before._apiType === 'page') {
+        operations.push({
+          type: 'del-page',
+          id: item.before.id,
+        });
+      } else if (item.before._apiType === 'node') {
+        operations.push({
+          type: 'del-obj',
+          id: item.before.id,
+        });
+      }
+    }
+  }
+
+  return {
+    newDocumentName: newDocumentName,
+    newTreeOperations: operations,
+  };
 }
 
 export const CompareOptions = z.object({

@@ -39,9 +39,12 @@ describe('document comparaison', () => {
 
       const transformedTree = transformDocument(emptyFigmaTree as GetFileResponse, mapping);
       const cleanHostedTree = cleanHostedDocument(emptyPenpotTree);
+
+      expect(transformedTree).not.toEqual(cleanHostedTree);
+
       const diff = getDifferences(cleanHostedTree, transformedTree);
 
-      expect(diff).not.toBeNull();
+      // expect(diff).not.toBeNull();
     });
   });
 });
