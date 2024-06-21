@@ -1,6 +1,7 @@
 import { CanvasNode } from '@figpot/src/clients/figma';
 import { MappingType } from '@figpot/src/features/document';
 import { translateChildren } from '@figpot/src/features/translators/translateChildren';
+import { translateId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { rgbToHex } from '@figpot/src/utils/color';
@@ -11,11 +12,19 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
   // to be sure it does not trigger a useless update
   //
 
+  // By default it should be `00000000-0000-0000-0000-000000000000` for each page but it would cause issues with multiple pages inside our unique graph
+  // Since Penpot allows forcing IDs we rely on generating a random one (but using a fixed pattern as input for the mapping to work across synchronizations)
+  const penpotRootFrameId = translateId('00000000-0000-0000-0000-000000000000');
+
   const page: PenpotPage = {
+    id: translateId(figmaNode.id),
+    name: figmaNode.name,
     options: {},
     objects: {
-      '00000000_0000_0000_0000_000000000000': {
-        id: '00000000-0000-0000-0000-000000000000',
+      [translateUuidAsObjectKey(penpotRootFrameId)]: {
+        id: penpotRootFrameId,
+        parentId: penpotRootFrameId,
+        frameId: penpotRootFrameId,
         name: 'Root Frame',
         type: 'frame',
         x: 0,
@@ -67,8 +76,6 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
           e: 0,
           f: 0,
         },
-        parentId: '00000000-0000-0000-0000-000000000000',
-        frameId: '00000000-0000-0000-0000-000000000000',
         flipX: null,
         flipY: null,
         hideFillOnExport: false,
@@ -81,11 +88,9 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
             fillOpacity: 1,
           },
         ],
-        shapes: [],
+        // shapes: [], // This one seems just informational and would complicates the recursive top-down logic (this concerns bool, frame and group types)
       },
     },
-    id: figmaNode.id,
-    name: figmaNode.name,
   };
 
   const registeredPageNodes: PenpotNode[] = [];
@@ -100,7 +105,7 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
         pageNode.id = mappedId;
       }
 
-      page.objects[pageNode.id] = pageNode;
+      page.objects[translateUuidAsObjectKey(pageNode.id)] = pageNode;
     }
   }
 

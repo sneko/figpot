@@ -312,14 +312,22 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       } else if (item.after._apiType === 'node') {
         const { _apiType, _realPageParentId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 
+        // No matter if the difference is a creation/change/removal, it's committed the same way
+        // Note: maybe a doubt about the "removal" of a property if undefined? Maybe we need to set that to `null`? Or to throw an error since it's a miss from the Figma mappers?
+        const changedFirstLevelProperties = item.differences
+          .filter((difference) => difference.path.length > 0)
+          .map((difference) => difference.path[0])
+          .filter((property) => typeof property === 'string' && propertiesObj.hasOwnProperty(property)) as (keyof typeof propertiesObj)[];
+        const uniqueProperties = [...new Set(changedFirstLevelProperties)];
+
         operations.push({
           type: 'mod-obj',
           id: item.after.id,
-          operations: Object.entries(propertiesObj).map(([property, value]) => {
+          operations: uniqueProperties.map((property) => {
             return {
               type: 'set',
               attr: property,
-              val: value,
+              val: propertiesObj[property],
             };
           }),
         });
