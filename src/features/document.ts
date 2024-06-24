@@ -473,8 +473,8 @@ export async function processDifferences(penpotDocumentId: string, differences: 
     await postCommandUpdateFile({
       requestBody: {
         id: penpotDocumentId,
-        revn: 1, // TODO: how to get it? From the hosted object and keep in the mapping?
-        sessionId: '', // TODO: mandatory, what to set?
+        revn: 1, // Required but does no block to use a default one
+        sessionId: '00000000-0000-0000-0000-000000000000', // It has to be UUID format, no matter the value for us
         changes: differences.newTreeOperations,
       },
     });
