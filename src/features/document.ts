@@ -39,6 +39,7 @@ export type LitePageNode = Pick<PenpotDocument['data']['pagesIndex'][0], 'id' | 
 export type LiteNode = PenpotNode & {
   _apiType: 'node';
   _realPageParentId: string | null; // Needed since main frame inside a page has as parent itself (which complicates things for our graph usage)
+  _pageId: string; // Somes endpoints require the `pageId` to be specified so adding it for the ease when doing updates on nodes
 };
 export type NodeLabel = LitePageNode | LiteNode;
 
@@ -275,6 +276,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       flattenCurrentGlobalTree.set(currentNode.id, {
         _apiType: 'node',
         _realPageParentId: currentNode.id === currentNode.parentId ? currentPageNode.id : null,
+        _pageId: currentPageNode.id,
         ...currentNode,
       } as LiteNode);
     }
@@ -294,6 +296,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       const liteNode: LiteNode = {
         _apiType: 'node',
         _realPageParentId: newNode.id === newNode.parentId ? newPageNode.id : null,
+        _pageId: newPageNode.id,
         ...newNode,
       };
 
@@ -330,12 +333,12 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           name: item.after.name,
         });
       } else if (item.after._apiType === 'node') {
-        const { _apiType, _realPageParentId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
+        const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
 
         operations.push({
           type: 'add-obj',
           id: item.after.id, // Penpot allows forcing the ID at creation
-          pageId: item.after._realPageParentId || undefined,
+          pageId: item.after._realPageParentId || _pageId,
           frameId: item.after.frameId,
           parentId: item.after.parentId,
           obj: propertiesObj,
@@ -349,7 +352,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           name: item.after.name,
         });
       } else if (item.after._apiType === 'node') {
-        const { _apiType, _realPageParentId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
+        const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 
         // No matter if the difference is a creation/change/removal, it's committed the same way
         // Note: maybe a doubt about the "removal" of a property if undefined? Maybe we need to set that to `null`? Or to throw an error since it's a miss from the Figma mappers?
@@ -362,6 +365,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
         operations.push({
           type: 'mod-obj',
           id: item.after.id,
+          pageId: _pageId,
           operations: uniqueProperties.map((property) => {
             return {
               type: 'set',
@@ -399,6 +403,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
         operations.push({
           type: 'del-obj',
           id: item.before.id,
+          pageId: item.before._pageId,
         });
       }
     }
