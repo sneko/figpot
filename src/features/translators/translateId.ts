@@ -1,8 +1,10 @@
 import { v7 as uuidv7 } from 'uuid';
 
 import { MappingType } from '@figpot/src/features/document';
+import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 
 export const rootFrameId = '00000000-0000-0000-0000-000000000000';
+export const rootFrameIdSuffix = '_rootFrame';
 
 export function translateId(figmaNodeId: string, mapping: MappingType): string {
   const penpotMappedNodeId = mapping.nodes.get(figmaNodeId);
@@ -18,6 +20,18 @@ export function translateId(figmaNodeId: string, mapping: MappingType): string {
   return penpotNodeId;
 }
 
+export function registerId(figmaNodeId: string, penpotNodeId: string, mapping: MappingType) {
+  mapping.nodes.set(figmaNodeId, penpotNodeId);
+}
+
 export function translateUuidAsObjectKey(uuid: string): string {
   return uuid.replaceAll('-', '_');
+}
+
+export function formatPageRootFrameId(pageId: string) {
+  return `${pageId}${rootFrameIdSuffix}`;
+}
+
+export function isPageRootFrame(partialNode: Pick<PenpotNode, 'id' | 'parentId'>): boolean {
+  return partialNode.id === partialNode.parentId;
 }

@@ -3,7 +3,7 @@ import assert from 'assert';
 import { CanvasNode } from '@figpot/src/clients/figma';
 import { MappingType } from '@figpot/src/features/document';
 import { translateChildren } from '@figpot/src/features/translators/translateChildren';
-import { rootFrameId, translateId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
+import { formatPageRootFrameId, registerId, translateId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { rgbToHex } from '@figpot/src/utils/color';
@@ -14,12 +14,18 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): 
   // to be sure it does not trigger a useless update
   //
 
+  const penpotPageId = translateId(figmaNode.id, mapping);
+
   // When a page is created into Penpot a "root frame" is also created to wrap all child nodes. This one is immutable and has the ID `00000000-0000-0000-0000-000000000000`.
   // It implies this ID will occur X times if X pages, and it would break our graph since keyed by the node ID. So we add a temporary prefix to remove
-  const penpotRootFrameId = rootFrameId;
+  const virtualFigmaRootFrameId = formatPageRootFrameId(figmaNode.id);
+  const penpotRootFrameId = formatPageRootFrameId(penpotPageId);
+
+  // Force registration in case in a child the ID is used
+  registerId(virtualFigmaRootFrameId, penpotRootFrameId, mapping);
 
   const page: PenpotPage = {
-    id: translateId(figmaNode.id, mapping),
+    id: penpotPageId,
     name: figmaNode.name,
     options: {
       background: rgbToHex(figmaNode.backgroundColor),
@@ -98,7 +104,7 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): 
 
   const registeredPageNodes: PenpotNode[] = [];
 
-  translateChildren(registeredPageNodes, figmaNode.children, figmaNode.id, mapping);
+  translateChildren(registeredPageNodes, figmaNode.children, virtualFigmaRootFrameId, mapping);
 
   for (const penpotPageNode of registeredPageNodes) {
     assert(penpotPageNode.id); // It would mean we forget to translate it in a specific node type
