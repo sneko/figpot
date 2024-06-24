@@ -21,6 +21,7 @@ import { retrieveDocument } from '@figpot/src/features/figma';
 import { transformDocumentNode } from '@figpot/src/features/transformers/transformDocumentNode';
 import { PenpotDocument } from '@figpot/src/models/entities/penpot/document';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
+import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { formatDiffResultLog, getDiff } from '@figpot/src/utils/comparaison';
 import { gracefulExit } from '@figpot/src/utils/system';
 
@@ -35,11 +36,12 @@ export const mediasFolderPath = path.resolve(__root_dirname, './data/medias/');
 export const FigmaToPenpotMapping = z.map(z.string(), z.string());
 export type FigmaToPenpotMappingType = z.infer<typeof FigmaToPenpotMapping>;
 
-export type LitePageNode = Pick<PenpotDocument['data']['pagesIndex'][0], 'id' | 'name'> & { _apiType: 'page' };
+export type LitePageNode = Pick<PenpotDocument['data']['pagesIndex'][0], 'id' | 'name' | 'options'> & { _apiType: 'page' };
 export type LiteNode = PenpotNode & {
   _apiType: 'node';
   _realPageParentId: string | null; // Needed since main frame inside a page has as parent itself (which complicates things for our graph usage)
   _pageId: string; // Somes endpoints require the `pageId` to be specified so adding it for the ease when doing updates on nodes
+  _rootFrame: boolean; // Since created automatically by the parent page it needs a specific handling logic
 };
 export type NodeLabel = LitePageNode | LiteNode;
 
@@ -268,14 +270,19 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       _apiType: 'page',
       id: currentPageNode.id,
       name: currentPageNode.name,
+      options: currentPageNode.options,
     } as LitePageNode);
 
     for (const currentNode of Object.values(currentPageNode.objects)) {
       assert(currentNode.id);
 
-      flattenCurrentGlobalTree.set(currentNode.id, {
+      const isPageRootFrame = currentNode.id === currentNode.parentId;
+      const uniqueIndexId = isPageRootFrame ? `${currentPageNode.id}_${currentNode.id}` : currentNode.id; // Index must be unique for comparaison and graph (this is due to root frame having unique ID for each page, so we modify the index without modifying underlying node ID)
+
+      flattenCurrentGlobalTree.set(uniqueIndexId, {
         _apiType: 'node',
-        _realPageParentId: currentNode.id === currentNode.parentId ? currentPageNode.id : null,
+        _realPageParentId: isPageRootFrame ? currentPageNode.id : null,
+        _rootFrame: isPageRootFrame,
         _pageId: currentPageNode.id,
         ...currentNode,
       } as LiteNode);
@@ -287,15 +294,19 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       _apiType: 'page',
       id: newPageNode.id,
       name: newPageNode.name,
+      options: newPageNode.options,
     };
 
     flattenNewGlobalTree.set(litePageNode.id, litePageNode);
     newGraph.setNode(litePageNode.id, true); // No care about the content since we will take if from the diff
 
     for (const newNode of Object.values(newPageNode.objects)) {
+      const isPageRootFrame = newNode.id === newNode.parentId;
+
       const liteNode: LiteNode = {
         _apiType: 'node',
-        _realPageParentId: newNode.id === newNode.parentId ? newPageNode.id : null,
+        _realPageParentId: isPageRootFrame ? newPageNode.id : null,
+        _rootFrame: isPageRootFrame,
         _pageId: newPageNode.id,
         ...newNode,
       };
@@ -303,12 +314,14 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       assert(liteNode.id);
       assert(liteNode.parentId);
 
-      flattenNewGlobalTree.set(liteNode.id, liteNode);
-      newGraph.setNode(liteNode.id, true); // No care about the content since we will take if from the diff
+      const uniqueIndexId = isPageRootFrame ? `${newPageNode.id}_${liteNode.id}` : liteNode.id; // Index must be unique for comparaison and graph (this is due to root frame having unique ID for each page, so we modify the index without modifying underlying node ID)
+
+      flattenNewGlobalTree.set(uniqueIndexId, liteNode);
+      newGraph.setNode(uniqueIndexId, true); // No care about the content since we will take if from the diff
 
       // Trying to add the edge between 2 nodes, if not existing it will "pre-create" the node without content
       // And into the next iterations (since all must be in the list) it will add the needed node content (it avoids looping 2 times)
-      newGraph.setEdge(liteNode._realPageParentId || liteNode.parentId, liteNode.id);
+      newGraph.setEdge(liteNode._realPageParentId || liteNode.parentId, uniqueIndexId);
     }
   }
 
@@ -327,22 +340,50 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       assert(item.after.id);
 
       if (item.after._apiType === 'page') {
-        operations.push({
-          type: 'add-page',
-          id: item.after.id, // Penpot allows forcing the ID at creation
-          name: item.after.name,
-        });
-      } else if (item.after._apiType === 'node') {
-        const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
+        const { _apiType, id, name, ...propertiesObj } = item.after; // Instruction to omit some properties
 
         operations.push({
-          type: 'add-obj',
-          id: item.after.id, // Penpot allows forcing the ID at creation
-          pageId: item.after._realPageParentId || _pageId,
-          frameId: item.after.frameId,
-          parentId: item.after.parentId,
-          obj: propertiesObj,
+          type: 'add-page',
+          id: id, // Penpot allows forcing the ID at creation
+          name: name,
+          page: {
+            ...propertiesObj,
+          },
         });
+      } else if (item.after._apiType === 'node') {
+        const { _apiType, _realPageParentId, _pageId, _rootFrame, frameId, id, mainInstance, parentId, ...propertiesObj } = item.after; // Instruction to omit some properties
+
+        if (_rootFrame) {
+          // The root frame is automatically created with its wrapping page (the iteration before this one normally)
+          // So we just need to apply modifications if needed
+          operations.push({
+            type: 'mod-obj',
+            id: item.after.id,
+            pageId: _pageId,
+            operations: (Object.keys(propertiesObj) as (keyof typeof propertiesObj)[])
+              // No need to have the whole node differences patch logic since root frame can only have its colors customized
+              .filter((p) => p === 'fills')
+              .map((property) => {
+                return {
+                  type: 'set',
+                  attr: property,
+                  val: propertiesObj[property],
+                };
+              }),
+          });
+        } else {
+          operations.push({
+            type: 'add-obj',
+            id: item.after.id, // Penpot allows forcing the ID at creation
+            pageId: item.after._realPageParentId || _pageId,
+            frameId: item.after.frameId,
+            parentId: item.after.parentId,
+            obj: {
+              ...propertiesObj,
+              shapes: item.after.type === 'frame' ? [] : undefined, // This is required to create frames (we don't have this into the comparaison trees to only go from top to bottom with a simple logic)
+            },
+          });
+        }
       }
     } else if (item.state === 'updated') {
       if (item.after._apiType === 'page') {
@@ -351,6 +392,21 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           id: item.after.id,
           name: item.after.name,
         });
+
+        const { _apiType, id, name, ...propertiesObj } = item.after; // Instruction to omit some properties
+
+        for (const difference of item.differences) {
+          if (difference.path.length > 1 && difference.path[0] === 'options') {
+            const optionKey = difference.path[1] as keyof PenpotPage['options'];
+
+            operations.push({
+              type: 'set-option',
+              pageId: item.after.id,
+              option: optionKey,
+              value: propertiesObj.options[optionKey],
+            });
+          }
+        }
       } else if (item.after._apiType === 'node') {
         const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 

@@ -3,7 +3,7 @@ import assert from 'assert';
 import { CanvasNode } from '@figpot/src/clients/figma';
 import { MappingType } from '@figpot/src/features/document';
 import { translateChildren } from '@figpot/src/features/translators/translateChildren';
-import { translateId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
+import { rootFrameId, translateId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { rgbToHex } from '@figpot/src/utils/color';
@@ -14,14 +14,16 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): 
   // to be sure it does not trigger a useless update
   //
 
-  // By default it should be `00000000-0000-0000-0000-000000000000` for each page but it would cause issues with multiple pages inside our unique graph
-  // Since Penpot allows forcing IDs we rely on generating a random one (but using a fixed pattern as input for the mapping to work across synchronizations)
-  const penpotRootFrameId = translateId('00000000-0000-0000-0000-000000000000', mapping);
+  // When a page is created into Penpot a "root frame" is also created to wrap all child nodes. This one is immutable and has the ID `00000000-0000-0000-0000-000000000000`.
+  // It implies this ID will occur X times if X pages, and it would break our graph since keyed by the node ID. So we add a temporary prefix to remove
+  const penpotRootFrameId = rootFrameId;
 
   const page: PenpotPage = {
     id: translateId(figmaNode.id, mapping),
     name: figmaNode.name,
-    options: {},
+    options: {
+      background: rgbToHex(figmaNode.backgroundColor),
+    },
     objects: {
       [translateUuidAsObjectKey(penpotRootFrameId)]: {
         id: penpotRootFrameId,
@@ -86,11 +88,10 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): 
         proportion: 1,
         fills: [
           {
-            fillColor: rgbToHex(figmaNode.backgroundColor),
+            fillColor: '#FFFFFF', // The background is managed by the page option, not by the root frame ID so leaving the default here
             fillOpacity: 1,
           },
         ],
-        // shapes: [], // This one seems just informational and would complicates the recursive top-down logic (this concerns bool, frame and group types)
       },
     },
   };
