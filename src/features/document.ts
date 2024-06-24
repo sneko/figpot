@@ -94,13 +94,9 @@ export function getFigmaToPenpotDiffPath(figmaDocumentId: string, penpotDocument
   return path.resolve(getPenpotDocumentPath(figmaDocumentId, penpotDocumentId), 'diff.json');
 }
 
-export function getTransformedFigmaTreePath(documentId: string) {
-  return path.resolve(getFigmaDocumentPath(documentId), 'transformed-tree.json');
+export function getTransformedFigmaTreePath(figmaDocumentId: string, penpotDocumentId: string) {
+  return path.resolve(getPenpotDocumentPath(figmaDocumentId, penpotDocumentId), 'transformed-tree.json');
 }
-
-// export function getTransformedFigmaTreePath(figmaDocumentId: string, penpotDocumentId: string) {
-//   return path.resolve(getPenpotDocumentPath(figmaDocumentId, penpotDocumentId), 'transformed-tree.json');
-// }
 
 export async function readFigmaTreeFile(documentId: string): Promise<GetFileResponse> {
   const figmaTreePath = getFigmaDocumentTreePath(documentId);
@@ -114,19 +110,19 @@ export async function readFigmaTreeFile(documentId: string): Promise<GetFileResp
   return JSON.parse(figmaTreeString) as GetFileResponse; // We did not implement a zod schema, hoping they keep the structure stable enough
 }
 
-export async function readTransformedFigmaTreeFile(documentId: string): Promise<PenpotDocument> {
-  const transformedFigmaTreePath = getTransformedFigmaTreePath(documentId);
+export async function readTransformedFigmaTreeFile(figmaDocumentId: string, penpotDocumentId: string): Promise<PenpotDocument> {
+  const transformedFigmaTreePath = getTransformedFigmaTreePath(figmaDocumentId, penpotDocumentId);
 
   if (!fsSync.existsSync(transformedFigmaTreePath)) {
-    throw new Error(`make sure to run the "retrieve" command on the Figma document "${documentId}" before using any other command`);
+    throw new Error(`make sure to run the "retrieve" command on the Figma document "${figmaDocumentId}" before using any other command`);
   }
 
-  const figmaTreeString = await fs.readFile(transformedFigmaTreePath, 'utf-8');
+  const transformedTreeString = await fs.readFile(transformedFigmaTreePath, 'utf-8');
 
-  return JSON.parse(figmaTreeString) as PenpotDocument; // We did not implement a zod schema, hoping they keep the structure stable enough
+  return JSON.parse(transformedTreeString) as PenpotDocument; // We did not implement a zod schema, hoping they keep the structure stable enough
 }
 
-export async function readFigmaToPenpotDiffFile(figmaDocumentId: string, penpotDocumentId: string): Promise<unknown[]> {
+export async function readFigmaToPenpotDiffFile(figmaDocumentId: string, penpotDocumentId: string): Promise<Differences> {
   const diffPath = getFigmaToPenpotDiffPath(figmaDocumentId, penpotDocumentId);
 
   if (!fsSync.existsSync(diffPath)) {
@@ -135,7 +131,7 @@ export async function readFigmaToPenpotDiffFile(figmaDocumentId: string, penpotD
 
   const diffString = await fs.readFile(diffPath, 'utf-8');
 
-  return JSON.parse(diffString) as unknown[]; // We did not implement a zod schema, hoping they keep the structure stable enough
+  return JSON.parse(diffString) as Differences; // We did not implement a zod schema, hoping they keep the structure stable enough
 }
 
 export async function retrieve(options: RetrieveOptionsType) {
@@ -178,15 +174,16 @@ export async function transform(options: TransformOptionsType) {
   // Go from the Figma format to the Penpot one
   for (const document of options.documents) {
     const figmaTree = await readFigmaTreeFile(document.figmaDocument);
+    const penpotDocumentId = document.penpotDocument;
 
     let mappingPath: string;
     let mapping: MappingType | null = null;
-    if (document.penpotDocument) {
-      mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, document.penpotDocument);
+    if (penpotDocumentId) {
+      mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, penpotDocumentId);
 
       if (!fsSync.existsSync(mappingPath)) {
         const answer = await confirm({
-          message: `You target the Penpot document "${document.penpotDocument}" without having locally the mapping from previous synchronization. Are you sure to continue by overriding the target document?`,
+          message: `You target the Penpot document "${penpotDocumentId}" without having locally the mapping from previous synchronization. Are you sure to continue by overriding the target document?`,
         });
 
         if (!answer) {
@@ -194,19 +191,30 @@ export async function transform(options: TransformOptionsType) {
 
           return gracefulExit();
         }
-
+      } else {
         const mappingString = await fs.readFile(mappingPath, 'utf-8');
-        mapping = Mapping.parse(JSON.parse(mappingString));
+        const mappingJson = JSON.parse(mappingString);
+
+        mapping = Mapping.parse({
+          ...mappingJson,
+          fonts: new Map(Object.entries(mappingJson.fonts)),
+          assets: new Map(Object.entries(mappingJson.assets)),
+          nodes: new Map(Object.entries(mappingJson.nodes)),
+          documents: new Map(Object.entries(mappingJson.documents)),
+        });
       }
     } else {
       // TODO: to simplify the process we should create the document from here
       throw new Error('transform operation requires a created penpot document for now');
 
+      // penpotDocumentId = ...
       // mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, xxx);
     }
 
     // If none, create a new one to be used
     if (!mapping) {
+      await fs.mkdir(path.dirname(mappingPath), { recursive: true });
+
       mapping = {
         lastExport: null,
         fonts: new Map(),
@@ -219,11 +227,22 @@ export async function transform(options: TransformOptionsType) {
     const penpotTree = transformDocument(figmaTree, mapping);
 
     // Save mapping for later usage
-    await fs.writeFile(mappingPath, JSON.stringify(mapping, null, 2));
+    await fs.writeFile(
+      mappingPath,
+      JSON.stringify(
+        {
+          ...mapping,
+          fonts: Object.fromEntries(mapping.fonts),
+          assets: Object.fromEntries(mapping.assets),
+          nodes: Object.fromEntries(mapping.nodes),
+          documents: Object.fromEntries(mapping.documents),
+        },
+        null,
+        2
+      )
+    );
 
-    // TODO: if mapping here, put the file into Penport, but have to create
-    // await fs.writeFile(getTransformedFigmaTreePath(document.figmaDocument, document.penpotDocument), JSON.stringify(penpotTree, null, 2));
-    await fs.writeFile(getTransformedFigmaTreePath(document.figmaDocument), JSON.stringify(penpotTree, null, 2));
+    await fs.writeFile(getTransformedFigmaTreePath(document.figmaDocument, penpotDocumentId), JSON.stringify(penpotTree, null, 2));
   }
 }
 
@@ -426,7 +445,7 @@ export async function compare(options: CompareOptionsType) {
 
     await fs.writeFile(getPenpotHostedDocumentTreePath(document.figmaDocument, document.penpotDocument), JSON.stringify(hostedDocument, null, 2));
 
-    const transformedDocument = await readTransformedFigmaTreeFile(document.figmaDocument);
+    const transformedDocument = await readTransformedFigmaTreeFile(document.figmaDocument, document.penpotDocument);
 
     const hostedCoreDocument = cleanHostedDocument(hostedDocument);
     const diff = getDifferences(hostedCoreDocument, transformedDocument);
@@ -468,10 +487,9 @@ export async function set(options: SetOptionsType) {
   for (const document of options.documents) {
     assert(document.penpotDocument);
 
-    const diff = readFigmaToPenpotDiffFile(document.figmaDocument, document.penpotDocument);
+    const diff = await readFigmaToPenpotDiffFile(document.figmaDocument, document.penpotDocument);
 
-    // TODO:
-    // await fs.writeFile(getFigmaToPenpotDiffPath(document.figmaDocument, document.penpotDocument), JSON.stringify(diff, null, 2));
+    await processDifferences(document.penpotDocument, diff);
   }
 }
 
