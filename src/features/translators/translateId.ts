@@ -2,6 +2,8 @@ import { v7 as uuidv7 } from 'uuid';
 
 import { MappingType } from '@figpot/src/features/document';
 
+export const rootFrameId = '00000000-0000-0000-0000-000000000000';
+
 export function translateId(figmaNodeId: string, mapping: MappingType): string {
   const penpotMappedNodeId = mapping.nodes.get(figmaNodeId);
   if (penpotMappedNodeId) {
