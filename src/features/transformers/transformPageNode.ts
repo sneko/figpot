@@ -1,3 +1,5 @@
+import assert from 'assert';
+
 import { CanvasNode } from '@figpot/src/clients/figma';
 import { MappingType } from '@figpot/src/features/document';
 import { translateChildren } from '@figpot/src/features/translators/translateChildren';
@@ -6,7 +8,7 @@ import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
 import { rgbToHex } from '@figpot/src/utils/color';
 
-export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | null): PenpotPage {
+export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): PenpotPage {
   //
   // TODO: we should strip properties of Penpot features like `proportionLock`
   // to be sure it does not trigger a useless update
@@ -14,10 +16,10 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
 
   // By default it should be `00000000-0000-0000-0000-000000000000` for each page but it would cause issues with multiple pages inside our unique graph
   // Since Penpot allows forcing IDs we rely on generating a random one (but using a fixed pattern as input for the mapping to work across synchronizations)
-  const penpotRootFrameId = translateId('00000000-0000-0000-0000-000000000000');
+  const penpotRootFrameId = translateId('00000000-0000-0000-0000-000000000000', mapping);
 
   const page: PenpotPage = {
-    id: translateId(figmaNode.id),
+    id: translateId(figmaNode.id, mapping),
     name: figmaNode.name,
     options: {},
     objects: {
@@ -95,18 +97,12 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType | 
 
   const registeredPageNodes: PenpotNode[] = [];
 
-  translateChildren(registeredPageNodes, figmaNode.children, figmaNode.id);
+  translateChildren(registeredPageNodes, figmaNode.children, figmaNode.id, mapping);
 
-  for (const pageNode of registeredPageNodes) {
-    if (pageNode.id) {
-      const mappedId = mapping?.nodes[pageNode.id] || null;
-      if (mappedId) {
-        // In case there is a binding, the node will be created since not in the mapping pairs
-        pageNode.id = mappedId;
-      }
+  for (const penpotPageNode of registeredPageNodes) {
+    assert(penpotPageNode.id); // It would mean we forget to translate it in a specific node type
 
-      page.objects[translateUuidAsObjectKey(pageNode.id)] = pageNode;
-    }
+    page.objects[translateUuidAsObjectKey(penpotPageNode.id)] = penpotPageNode;
   }
 
   return page;

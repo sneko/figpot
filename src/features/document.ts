@@ -32,7 +32,7 @@ export const documentsFolderPath = path.resolve(__root_dirname, './data/document
 export const fontsFolderPath = path.resolve(__root_dirname, './data/fonts/');
 export const mediasFolderPath = path.resolve(__root_dirname, './data/medias/');
 
-export const FigmaToPenpotMapping = z.record(z.string(), z.string());
+export const FigmaToPenpotMapping = z.map(z.string(), z.string());
 export type FigmaToPenpotMappingType = z.infer<typeof FigmaToPenpotMapping>;
 
 export type LitePageNode = Pick<PenpotDocument['data']['pagesIndex'][0], 'id' | 'name'> & { _apiType: 'page' };
@@ -43,7 +43,7 @@ export type LiteNode = PenpotNode & {
 export type NodeLabel = LitePageNode | LiteNode;
 
 export const Mapping = z.object({
-  lastExport: z.date(),
+  lastExport: z.date().nullable(),
   fonts: FigmaToPenpotMapping,
   assets: FigmaToPenpotMapping,
   nodes: FigmaToPenpotMapping,
@@ -160,7 +160,7 @@ export async function sortDocuments(documents: DocumentOptionsType[]): Promise<D
   return documents;
 }
 
-export function transformDocument(documentTree: GetFileResponse, mapping: MappingType | null) {
+export function transformDocument(documentTree: GetFileResponse, mapping: MappingType) {
   // Go from the Figma format to the Penpot one
   const penpotTree = transformDocumentNode(documentTree, mapping);
 
@@ -179,9 +179,10 @@ export async function transform(options: TransformOptionsType) {
   for (const document of options.documents) {
     const figmaTree = await readFigmaTreeFile(document.figmaDocument);
 
+    let mappingPath: string;
     let mapping: MappingType | null = null;
     if (document.penpotDocument) {
-      const mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, document.penpotDocument);
+      mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, document.penpotDocument);
 
       if (!fsSync.existsSync(mappingPath)) {
         const answer = await confirm({
@@ -197,9 +198,28 @@ export async function transform(options: TransformOptionsType) {
         const mappingString = await fs.readFile(mappingPath, 'utf-8');
         mapping = Mapping.parse(JSON.parse(mappingString));
       }
+    } else {
+      // TODO: to simplify the process we should create the document from here
+      throw new Error('transform operation requires a created penpot document for now');
+
+      // mappingPath = getFigmaToPenpotMappingPath(document.figmaDocument, xxx);
+    }
+
+    // If none, create a new one to be used
+    if (!mapping) {
+      mapping = {
+        lastExport: null,
+        fonts: new Map(),
+        assets: new Map(),
+        nodes: new Map(),
+        documents: new Map(),
+      };
     }
 
     const penpotTree = transformDocument(figmaTree, mapping);
+
+    // Save mapping for later usage
+    await fs.writeFile(mappingPath, JSON.stringify(mapping, null, 2));
 
     // TODO: if mapping here, put the file into Penport, but have to create
     // await fs.writeFile(getTransformedFigmaTreePath(document.figmaDocument, document.penpotDocument), JSON.stringify(penpotTree, null, 2));

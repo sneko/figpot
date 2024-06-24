@@ -11,13 +11,13 @@ describe('document comparaison', () => {
     it('should be equivalent', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: {},
-        documents: {},
-        fonts: {},
-        nodes: {
-          '0:0': '00000000-0000-0000-0000-000000000000',
-          '0:1': '4bf0e9f6-08c8-809c-8004-85445179c2aa',
-        },
+        assets: new Map(),
+        documents: new Map(),
+        fonts: new Map(),
+        nodes: new Map([
+          ['0:0', '00000000-0000-0000-0000-000000000000'],
+          ['0:1', '4bf0e9f6-08c8-809c-8004-85445179c2aa'],
+        ]),
       };
 
       const transformedTree = transformDocument(emptyFigmaTree as GetFileResponse, mapping);
@@ -34,10 +34,10 @@ describe('document comparaison', () => {
     it('should require changes', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: {},
-        documents: {},
-        fonts: {},
-        nodes: {},
+        assets: new Map(),
+        documents: new Map(),
+        fonts: new Map(),
+        nodes: new Map(),
       };
 
       const transformedTree = transformDocument(emptyFigmaTree as GetFileResponse, mapping);
@@ -57,14 +57,14 @@ describe('document comparaison', () => {
     it('should be equivalent', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: {},
-        documents: {},
-        fonts: {},
-        nodes: {
-          '0:0': '00000000-0000-0000-0000-000000000000',
-          '0:1': '4bf0e9f6-08c8-809c-8004-85445179c2aa',
-          '1:2': 'ddfee392-d246-80fc-8004-8664a46a5d1f',
-        },
+        assets: new Map(),
+        documents: new Map(),
+        fonts: new Map(),
+        nodes: new Map([
+          ['0:0', '00000000-0000-0000-0000-000000000000'],
+          ['0:1', '4bf0e9f6-08c8-809c-8004-85445179c2aa'],
+          ['1:2', 'ddfee392-d246-80fc-8004-8664a46a5d1f'],
+        ]),
       };
 
       const transformedTree = transformDocument(withRectangeFigmaTree as GetFileResponse, mapping);
@@ -78,13 +78,13 @@ describe('document comparaison', () => {
       expect(differences.newTreeOperations).toEqual([]);
     });
 
-    it('should require changes2', () => {
+    it('should require changes', () => {
       const mapping: MappingType = {
         lastExport: new Date(),
-        assets: {},
-        documents: {},
-        fonts: {},
-        nodes: {},
+        assets: new Map(),
+        documents: new Map(),
+        fonts: new Map(),
+        nodes: new Map(),
       };
 
       const transformedTree = transformDocument(withRectangeFigmaTree as GetFileResponse, mapping);
@@ -94,14 +94,9 @@ describe('document comparaison', () => {
 
       const differences = getDifferences(cleanHostedTree, transformedTree);
 
-      console.log(444444);
-      console.log(JSON.stringify(transformedTree));
-      console.log(5555555);
-      console.log(JSON.stringify(differences));
-
       expect(differences.newDocumentName).not.toBeNull();
-      expect(differences.newTreeOperations.length).toBe(4);
-      expect(differences.newTreeOperations.map((op) => op.type)).toEqual(['add-page', 'mod-obj', 'del-page']);
+      expect(differences.newTreeOperations.length).toBe(6);
+      expect(differences.newTreeOperations.map((op) => op.type)).toEqual(['add-page', 'add-obj', 'add-obj', 'del-page', 'del-obj', 'del-obj']);
     });
   });
 });

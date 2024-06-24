@@ -1,22 +1,24 @@
 import { SubcanvasNode } from '@figpot/src/clients/figma';
+import { MappingType } from '@figpot/src/features/document';
 import { transformSceneNode } from '@figpot/src/features/transformers/transformSceneNode';
+import { translateId } from '@figpot/src/features/translators/translateId';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 
 export function translateChildren(
   registeredPageNodes: PenpotNode[],
   figmaChildren: SubcanvasNode[],
   figmaParentId: string,
+  mapping: MappingType,
   baseX: number = 0,
   baseY: number = 0
 ) {
   for (const figmaChild of figmaChildren) {
     const penpotNode = transformSceneNode(registeredPageNodes, figmaChild, baseX, baseY);
+    const penpotNodeId = translateId(figmaChild.id, mapping);
 
-    if (penpotNode) {
-      // TODO: placeholder ID
-      penpotNode.parentId = figmaParentId;
+    penpotNode.id = penpotNodeId;
+    penpotNode.parentId = translateId(figmaParentId, mapping);
 
-      registeredPageNodes.push(penpotNode);
-    }
+    registeredPageNodes.push(penpotNode);
   }
 }

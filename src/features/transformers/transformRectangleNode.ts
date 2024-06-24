@@ -16,8 +16,6 @@ export function transformRectangleNode(node: RectangleNode, baseX: number, baseY
   return {
     type: 'rect',
     name: node.name,
-    id: node.id, // TODO: uuid... register
-    parentId: node.id,
     // TODO:
     // ...transformFigmaIds(node),
     ...transformFills(node),
