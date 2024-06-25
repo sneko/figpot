@@ -358,7 +358,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
               .map((property) => {
                 return {
                   type: 'set',
-                  attr: property,
+                  attr: kebabCase(property), // Since it's a value we make sure to respect backend keywords logic
                   val: propertiesObj[property],
                 };
               }),
@@ -397,7 +397,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
             operations.push({
               type: 'set-option',
               pageId: item.after.id,
-              option: optionKey,
+              option: kebabCase(optionKey), // Since it's a value we make sure to respect backend keywords logic
               value: propertiesObj.options[optionKey],
             });
           }
@@ -422,7 +422,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           operations: uniqueProperties.map((property) => {
             return {
               type: 'set',
-              attr: kebabCase(property), // Needed because otherwise the database is having 2 `transformInverse` (the initial one, and one from our update). Probably due to our temporary workaround to map the input payload on the backend.
+              attr: kebabCase(property), // Since it's a value we make sure to respect backend keywords logic (otherwise we ended having 2 `transformInverse` (the initial one, and one from our update))
               val:
                 (property === 'parentId' || property === 'frameId') && isPageRootFrameFromId(propertiesObj[property] as string)
                   ? rootFrameId
