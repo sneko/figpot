@@ -1,5 +1,6 @@
 import { confirm } from '@inquirer/prompts';
 import assert from 'assert';
+import { kebabCase } from 'change-case';
 import { camelCase } from 'change-case/keys';
 import fsSync from 'fs';
 import fs from 'fs/promises';
@@ -421,7 +422,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           operations: uniqueProperties.map((property) => {
             return {
               type: 'set',
-              attr: property,
+              attr: kebabCase(property), // Needed because otherwise the database is having 2 `transformInverse` (the initial one, and one from our update). Probably due to our temporary workaround to map the input payload on the backend.
               val:
                 (property === 'parentId' || property === 'frameId') && isPageRootFrameFromId(propertiesObj[property] as string)
                   ? rootFrameId
