@@ -6,6 +6,7 @@ import { transformDimension } from '@figpot/src/features/transformers/partials/t
 import { transformEffects } from '@figpot/src/features/transformers/partials/transformEffects';
 // import { transformFigmaIds } from '@figpot/src/features/transformers/partials/transformFigmaIds';
 import { transformFills } from '@figpot/src/features/transformers/partials/transformFills';
+import { transformFlip } from '@figpot/src/features/transformers/partials/transformFlip';
 import { transformProportion } from '@figpot/src/features/transformers/partials/transformProportion';
 import { transformRotationAndPosition } from '@figpot/src/features/transformers/partials/transformRotationAndPosition';
 import { transformSceneNode } from '@figpot/src/features/transformers/partials/transformSceneNode';
@@ -19,6 +20,7 @@ export function transformRectangleNode(node: RectangleNode, baseX: number, baseY
     // TODO:
     // ...transformFigmaIds(node),
     ...transformFills(node),
+    ...transformFlip(node),
     // ...transformEffects(node),
     // ...transformStrokes(node),
     ...transformDimension(node, baseX, baseY),
