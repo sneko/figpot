@@ -21,7 +21,7 @@ export function transformRectangleNode(node: RectangleNode, baseX: number, baseY
     ...transformFills(node),
     // ...transformEffects(node),
     // ...transformStrokes(node),
-    ...transformDimension(node),
+    ...transformDimension(node, baseX, baseY),
     ...transformRotationAndPosition(node, baseX, baseY),
     // ...transformSceneNode(node),
     // ...transformBlend(node),

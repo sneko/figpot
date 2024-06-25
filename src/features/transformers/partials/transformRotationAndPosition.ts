@@ -2,6 +2,7 @@ import assert from 'assert';
 
 import { HasLayoutTrait, Rectangle, Transform } from '@figpot/src/clients/figma';
 import { ShapeBaseAttributes, ShapeGeomAttributes } from '@figpot/src/models/entities/penpot/shape';
+import { Matrix } from '@figpot/src/models/entities/penpot/traits/matrix';
 import { Point } from '@figpot/src/models/entities/penpot/traits/point';
 
 function getRotationAngle(transform: Transform) {
@@ -13,6 +14,15 @@ function getRotationAngle(transform: Transform) {
 
   return angleInDegrees;
 }
+
+export const neutralTransforMatrix: Matrix = {
+  a: 1,
+  b: 0,
+  c: 0,
+  d: 1,
+  e: 0,
+  f: 0,
+};
 
 export function transformRotationAndPosition(
   node: HasLayoutTrait,
@@ -29,8 +39,8 @@ export function transformRotationAndPosition(
       x,
       y,
       rotation: 0,
-      transform: undefined,
-      transformInverse: undefined,
+      transform: neutralTransforMatrix,
+      transformInverse: neutralTransforMatrix,
     };
   }
 
@@ -41,8 +51,8 @@ export function transformRotationAndPosition(
       x,
       y,
       rotation,
-      transform: undefined,
-      transformInverse: undefined,
+      transform: neutralTransforMatrix,
+      transformInverse: neutralTransforMatrix,
     };
   }
 

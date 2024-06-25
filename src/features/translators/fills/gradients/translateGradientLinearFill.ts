@@ -1,4 +1,5 @@
 import { GradientPaint } from '@figpot/src/clients/figma';
+import { translateOpacity } from '@figpot/src/features/translators/fills/translateOpacity';
 import { Fill } from '@figpot/src/models/entities/penpot/traits/fill';
 import { rgbToHex } from '@figpot/src/utils/color';
 import { calculateLinearGradient } from '@figpot/src/utils/gradient';
@@ -20,6 +21,6 @@ export function translateGradientLinearFill(fill: GradientPaint): Fill {
         opacity: stop.color.a * (fill.opacity ?? 1),
       })),
     },
-    fillOpacity: !fill.visible ? 0 : fill.opacity,
+    fillOpacity: translateOpacity(fill),
   };
 }
