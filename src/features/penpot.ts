@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { PostCommandGetFileResponse } from '@figpot/src/clients/penpot';
-import { formatPageRootFrameId, isPageRootFrame, rootFrameId } from '@figpot/src/features/translators/translateId';
+import { formatPageRootFrameId, rootFrameId, translateUuidAsObjectKey } from '@figpot/src/features/translators/translateId';
 import { PenpotDocument } from '@figpot/src/models/entities/penpot/document';
 
 export function cleanHostedDocument(hostedTree: PostCommandGetFileResponse): PenpotDocument {
@@ -14,16 +14,21 @@ export function cleanHostedDocument(hostedTree: PostCommandGetFileResponse): Pen
   for (const [, page] of Object.entries(pagesIndex)) {
     // To avoid collission about Penpot fixed root frame IDs for each page we adjust
     // the name here so it will match the transformation done from Figma
-    const rootFrameNode = page.objects[rootFrameId];
+    const rootFrameKey = translateUuidAsObjectKey(rootFrameId);
+    const rootFrameNode = page.objects[rootFrameKey];
 
     assert(rootFrameNode); // Not having the root frame for this page would be abnormal
 
-    if (rootFrameNode) {
+    {
       const newId = formatPageRootFrameId(page.id);
 
       rootFrameNode.id = newId;
       rootFrameNode.parentId = newId;
       rootFrameNode.frameId = newId;
+
+      // To go fully with this logic, also change the object key
+      page.objects[translateUuidAsObjectKey(newId)] = rootFrameNode;
+      delete page.objects[rootFrameKey];
     }
 
     // Then manage the rest of the logic

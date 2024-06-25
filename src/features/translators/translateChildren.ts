@@ -8,6 +8,7 @@ export function translateChildren(
   registeredPageNodes: PenpotNode[],
   figmaChildren: SubcanvasNode[],
   figmaParentId: string,
+  closestFigmaFrameId: string,
   mapping: MappingType,
   baseX: number = 0,
   baseY: number = 0
@@ -18,6 +19,7 @@ export function translateChildren(
 
     penpotNode.id = penpotNodeId;
     penpotNode.parentId = translateId(figmaParentId, mapping);
+    penpotNode.frameId = translateId(closestFigmaFrameId, mapping);
 
     registeredPageNodes.push(penpotNode);
   }

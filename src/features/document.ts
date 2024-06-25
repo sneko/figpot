@@ -19,7 +19,7 @@ import {
 } from '@figpot/src/clients/penpot';
 import { retrieveDocument } from '@figpot/src/features/figma';
 import { transformDocumentNode } from '@figpot/src/features/transformers/transformDocumentNode';
-import { isPageRootFrame } from '@figpot/src/features/translators/translateId';
+import { isPageRootFrame, isPageRootFrameFromId, rootFrameId } from '@figpot/src/features/translators/translateId';
 import { PenpotDocument } from '@figpot/src/models/entities/penpot/document';
 import { PenpotNode } from '@figpot/src/models/entities/penpot/node';
 import { PenpotPage } from '@figpot/src/models/entities/penpot/page';
@@ -349,7 +349,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           // So we just need to apply modifications if needed
           operations.push({
             type: 'mod-obj',
-            id: item.after.id,
+            id: rootFrameId,
             pageId: _pageId,
             operations: (Object.keys(propertiesObj) as (keyof typeof propertiesObj)[])
               // No need to have the whole node differences patch logic since root frame can only have its colors customized
@@ -363,12 +363,15 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
               }),
           });
         } else {
+          assert(item.after.parentId);
+          assert(item.after.frameId);
+
           operations.push({
             type: 'add-obj',
             id: item.after.id, // Penpot allows forcing the ID at creation
             pageId: item.after._realPageParentId || _pageId,
-            frameId: item.after.frameId,
-            parentId: item.after.parentId,
+            frameId: isPageRootFrameFromId(item.after.frameId) ? rootFrameId : item.after.frameId,
+            parentId: isPageRootFrameFromId(item.after.parentId) ? rootFrameId : item.after.parentId,
             obj: {
               ...propertiesObj,
               shapes: item.after.type === 'frame' ? [] : undefined, // This is required to create frames (we don't have this into the comparaison trees to only go from top to bottom with a simple logic)
@@ -401,6 +404,8 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       } else if (item.after._apiType === 'node') {
         const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 
+        assert(id);
+
         // No matter if the difference is a creation/change/removal, it's committed the same way
         // Note: maybe a doubt about the "removal" of a property if undefined? Maybe we need to set that to `null`? Or to throw an error since it's a miss from the Figma mappers?
         const changedFirstLevelProperties = item.differences
@@ -411,7 +416,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
 
         operations.push({
           type: 'mod-obj',
-          id: item.after.id,
+          id: isPageRootFrameFromId(id) ? rootFrameId : id,
           pageId: _pageId,
           operations: uniqueProperties.map((property) => {
             return {

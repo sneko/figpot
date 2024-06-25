@@ -35,3 +35,7 @@ export function formatPageRootFrameId(pageId: string) {
 export function isPageRootFrame(partialNode: Pick<PenpotNode, 'id' | 'parentId'>): boolean {
   return partialNode.id === partialNode.parentId;
 }
+
+export function isPageRootFrameFromId(nodeId: string): boolean {
+  return nodeId.endsWith(rootFrameIdSuffix);
+}

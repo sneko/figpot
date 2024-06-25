@@ -104,7 +104,7 @@ export function transformPageNode(figmaNode: CanvasNode, mapping: MappingType): 
 
   const registeredPageNodes: PenpotNode[] = [];
 
-  translateChildren(registeredPageNodes, figmaNode.children, virtualFigmaRootFrameId, mapping);
+  translateChildren(registeredPageNodes, figmaNode.children, virtualFigmaRootFrameId, virtualFigmaRootFrameId, mapping);
 
   for (const penpotPageNode of registeredPageNodes) {
     assert(penpotPageNode.id); // It would mean we forget to translate it in a specific node type
