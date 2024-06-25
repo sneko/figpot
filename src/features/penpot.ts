@@ -19,23 +19,24 @@ export function cleanHostedDocument(hostedTree: PostCommandGetFileResponse): Pen
 
     assert(rootFrameNode); // Not having the root frame for this page would be abnormal
 
-    {
-      const newId = formatPageRootFrameId(page.id);
+    const newRootFrameNodeId = formatPageRootFrameId(page.id);
 
-      rootFrameNode.id = newId;
-      rootFrameNode.parentId = newId;
-      rootFrameNode.frameId = newId;
+    rootFrameNode.id = newRootFrameNodeId;
+    rootFrameNode.parentId = newRootFrameNodeId;
+    rootFrameNode.frameId = newRootFrameNodeId;
 
-      // To go fully with this logic, also change the object key
-      page.objects[translateUuidAsObjectKey(newId)] = rootFrameNode;
-      delete page.objects[rootFrameKey];
-    }
+    // To go fully with this logic, also change the object key
+    page.objects[translateUuidAsObjectKey(newRootFrameNodeId)] = rootFrameNode;
+    delete page.objects[rootFrameKey];
 
     // Then manage the rest of the logic
     for (const [, object] of Object.entries(page.objects)) {
       if (object.type === 'bool' || object.type === 'frame' || object.type === 'group') {
         delete object.shapes; // Since object is a reference it will act on the main object
       }
+
+      object.parentId = object.parentId === rootFrameId ? newRootFrameNodeId : object.parentId;
+      object.frameId = object.frameId === rootFrameId ? newRootFrameNodeId : object.frameId;
     }
   }
 

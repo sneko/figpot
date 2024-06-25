@@ -402,7 +402,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
           }
         }
       } else if (item.after._apiType === 'node') {
-        const { _apiType, _realPageParentId, _pageId, frameId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
+        const { _apiType, _realPageParentId, _pageId, id, mainInstance, ...propertiesObj } = item.after; // Instruction to omit some properties
 
         assert(id);
 
@@ -422,7 +422,10 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
             return {
               type: 'set',
               attr: property,
-              val: propertiesObj[property],
+              val:
+                (property === 'parentId' || property === 'frameId') && isPageRootFrameFromId(propertiesObj[property] as string)
+                  ? rootFrameId
+                  : propertiesObj[property],
             };
           }),
         });
@@ -454,7 +457,7 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
       } else if (item.before._apiType === 'node') {
         operations.push({
           type: 'del-obj',
-          id: item.before.id,
+          id: isPageRootFrame(item.before) ? rootFrameId : item.before.id,
           pageId: item.before._pageId,
         });
       }
