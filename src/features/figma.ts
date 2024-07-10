@@ -184,10 +184,37 @@ export function extractStylesTypographies(documentTree: GetFileResponse, stylesN
 export async function retrieveDocument(documentId: string) {
   const documentTree = await getFile({
     fileKey: documentId,
-    geometry: 'paths', // Needed to have all properties into nodes
+    // geometry: 'paths', // Needed to have all properties into nodes
+    geometry: undefined, // Needed to have all properties into nodes
   });
 
+  // Error: Cannot create a string longer than 0x1fffffe8 characters
+  //   at TextDecoder.decode (node:internal/encoding:449:16)
+  //   at utf8DecodeBytes (node:internal/deps/undici/undici:2973:34)
+  //   at parseJSONFromBytes (node:internal/deps/undici/undici:4306:25)
+  //   at successSteps (node:internal/deps/undici/undici:4288:27)
+  //   at fullyReadBody (node:internal/deps/undici/undici:2724:9)
+  //   at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+  //   at async consumeBody (node:internal/deps/undici/undici:4297:7)
+  //   at getResponseBody (/Users/sneko/Documents/beta.gouv.fr/repos/figpot/src/clients/figma/core/request.ts:217:13)
+  //   at <anonymous> (/Users/sneko/Documents/beta.gouv.fr/repos/figpot/src/clients/figma/core/request.ts:322:26) {
+  // code: 'ERR_STRING_TOO_LONG'
+
+  // - either use a stream if possible? but more complicated since it's not just an array (see etabli work)
+  // - or do not include "paths" but they must be retrieved just after with another endpoint (maybe nodes?ids=...) and we should patch the original answer... seems complicated since that's not a server issue
+  // -- if doing so, browse the document, if paths arrays are empty, add the object to a waitinglist
+  // -- once all listed, nodes?ids=xxxx for all, and since having direct objects instances, patch them with paths
+  // -- but it will not solve the issue of a string too wide? si... car c'est la string de réponse HTTP qui est trop longue... après individuellement c'est sûrement pas grave (quitte à tenter de tout nodes?ids=xxx et chunker si y'a des erreurs retournées)
+
+  // Revoir : https://stackoverflow.com/questions/68230031/cannot-create-a-string-longer-than-0x1fffffe8-characters-in-json-parse
+
+  // marche pas même sans "geometry: paths" ... wtf
+
   // TODO: return the metadata
+
+  console.log('good');
+
+  throw 77777;
 
   return documentTree;
 }
