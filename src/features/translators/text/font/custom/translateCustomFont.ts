@@ -10,7 +10,11 @@ export function translateCustomFont(
   fontWeight: string
 ): Pick<TextTypography, 'fontId' | 'fontVariantId' | 'fontWeight'> | undefined {
   const penpotFontVariantId = translateFontVariantId(fontName, fontWeight);
-  const simulatedFigmaFontVariantId = `${fontName.fontFamily}-${penpotFontVariantId}`; // Use to be consistent across synchronizations
+
+  // [WORKAROUND]
+  // This is an issue with their Figma UI...
+  const simulatedFigmaFontVariantId =
+    fontName.fontFamily === 'Marianne Medium' ? `Marianne-${penpotFontVariantId}` : `${fontName.fontFamily}-${penpotFontVariantId}`; // Use to be consistent across synchronizations
 
   return {
     fontId: translateFontId(simulatedFigmaFontVariantId, fontName, registry.getMapping()),

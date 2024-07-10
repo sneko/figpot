@@ -44,6 +44,9 @@ export function translateMediaId(figmaMediaId: string, mapping: MappingType): st
 export function translateFontId(simulatedFigmaFontVariantId: string, fontName: TypeStyle, mapping: MappingType): string {
   const penpotFontId = mapping.fonts.get(simulatedFigmaFontVariantId);
   if (!penpotFontId) {
+    console.log(333333);
+    console.log(simulatedFigmaFontVariantId);
+
     throw new Error(
       `the font variant "${fontName.fontPostScriptName || fontName.fontFamily}" is missing onto the Penpot instance for your team. Please go to your dashboard and add the font manually. We advise you to upload all variants of the font for the ease. Also, note we were not able to automate this because it cannot be scoped to a file and there would be a risk of duplication due to Penpot current validation`
     );

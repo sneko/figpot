@@ -304,7 +304,11 @@ export async function retrieve(options: RetrieveOptionsType) {
     await saveMapping(document.figmaDocument, document.penpotDocument, mapping);
 
     // Save the document tree locally
+    // const documentTree = await readFigmaTreeFile(document.figmaDocument);
     const documentTree = await retrieveDocument(document.figmaDocument);
+
+    // await fs.writeFile(getFigmaDocumentTreePath(document.figmaDocument), JSON.stringify(documentTree, null, 2));
+    // throw 666;
 
     // Process attached styles
     const stylesIds: string[] = Object.keys(documentTree.styles);
@@ -534,6 +538,10 @@ export function performBasicNodeCreation(
 
   pushOperationsWithOrderingLogic(normalOperations, delayedOperations, delayedForChildrenOperations, operation);
 
+  // console.log('-------');
+  // console.log(propertiesObj.name);
+  // console.log(componentId);
+  // console.log('-------');
 
   if (componentId) {
     delayBindingOperation(delayedOperations, id, _pageId, componentId, componentFile, componentRoot, mainInstance, shapeRef);
@@ -750,6 +758,18 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
         });
       } else if (item.after._apiType === 'component') {
         const { _apiType, ...propertiesObj } = item.after; // Instruction to omit some properties
+
+        // TODO: what does trigger a modification?
+        // check differences...
+        // maybe an encoding issue with emoji (from file and those from the database)
+
+        // console.log(2222);
+        // console.log('------');
+        // console.log(JSON.stringify(item.differences));
+        // console.log('------');
+
+        // [{"type":"REMOVE","path":["mainInstancePage"],"oldValue":null}]
+        //
 
         operations.push({
           type: 'mod-component',
@@ -971,6 +991,9 @@ export function getDifferences(currentTree: PenpotDocument, newTree: PenpotDocum
   // The API expects some bindings to have all nodes created, so running them at the end
   operations.push(...delayedOperations);
 
+  // console.log(222222222);
+  // console.log(JSON.stringify(delayedOperations));
+
   // Delete others (those should be orphan into the document now)
   for (const [, item] of diffResult) {
     if (item.state === 'removed') {
@@ -1160,7 +1183,15 @@ export async function processDifferences(figmaDocumentId: string, penpotDocument
     // but this seems not used in their code. The limit reached at runtime is 31457280 (30MB)
     // For huge design systems the limit is easily reached since in adddition we use raw JSON and not the Penpot transit protocol that could help a bit (but would complexify the implementation since no JS Penpot mapper for now)
     // We need to chunk operations if needed
-    const bodyLimitBytes = 31_457_280;
+    // const bodyLimitBytes = 31_457_280;
+    const bodyLimitBytes = 15_457_280;
+
+    // TODO:
+    // TODO:
+    // TODO: if the file is huge with too many operations the Java server may crash
+    // TODO: lowering this value help but it's not a silver bullet... should be tested against the SaaS version
+    // TODO:
+    // TODO:
 
     // Removing a hardcoded amount simulating the `Differences` structure
     // It's not perfect but it would add complexity to have it exact
@@ -1195,6 +1226,54 @@ export async function processDifferences(figmaDocumentId: string, penpotDocument
             changes: chunks[i],
           },
         });
+
+        // // console.log(1);
+        // // console.log(chunks[i].slice(0, 4));
+
+        // // throw 555;
+
+        // console.log(11111);
+        // // console.log(JSON.stringify(result.body.details));
+
+        // // const start = 0;
+        // // const step = 10_000;
+
+        // const start = 50_140;
+        // const step = 10;
+
+        // for (let u = start; u < chunks[i].length; u += step) {
+        //   const aaa = chunks[i].slice(u, u + step);
+
+        //   console.log(`[chunk ${i}] processing from "u" [${u} ; ${u + (step - 1)}]`);
+
+        //   // fsSync.writeFile(path.resolve(process.cwd(), 'chunks.json'), JSON.stringify(chunks[i], null, 2), () => {
+        //   //   console.warn('ERRORS!!! check the file');
+        //   // });
+
+        //   try {
+        //     await postCommandUpdateFile({
+        //       requestBody: {
+        //         id: penpotDocumentId,
+        //         revn: 0, // Required but does no block to use a default one
+        //         sessionId: '00000000-0000-0000-0000-000000000000', // It has to be UUID format, no matter the value for us
+        //         changes: aaa,
+        //         // changes: chunks[i],
+        //         // changes: chunks[i].slice(10000, 20000),
+        //       },
+        //     });
+        //   } catch (error) {
+        //     console.log(111111);
+        //     console.log(JSON.stringify(aaa));
+
+        //     throw error;
+        //   }
+        // }
+
+        // // console.log('---');
+        // // console.log('chunk OK');
+        // // console.log('---');
+
+        // // throw 666666666;
       } catch (error) {
         if (i > 1) {
           console.warn(

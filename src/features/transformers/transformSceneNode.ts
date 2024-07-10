@@ -22,6 +22,14 @@ export function transformSceneNode(
 ): PenpotNode {
   let penpotNode: PenpotNode | undefined;
 
+  // if (figmaNode.id === 'I7803:34547;518:1417') {
+  //   const { children, ...aaa } = figmaNode;
+
+  //   console.log(JSON.stringify(aaa));
+
+  //   throw 55555;
+  // }
+
   switch (figmaNode.type) {
     case 'RECTANGLE':
       penpotNode = transformRectangleNode(registry, figmaNode, figmaNodeTransform);
