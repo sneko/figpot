@@ -212,6 +212,11 @@ export async function retrieveDocument(documentId: string) {
 
   // TODO: return the metadata
 
+  // it returns normally whereas an error "ERR_STRING_TOO_LONG" has been returned... we should check documentTree ... and find a proper way to look at code (using custom client?)
+  // TODO: s'entraîner d'abord sans "paths" vu que ça bug déjà ... gain de temps
+  // TODO: par la suite... p-e simplifier les SVG pour pas flinguer la UI. Ou alors ne pas les mettre tout simplement quand leur taille dépasse une certaine longueur (vu que la conversion est approximative actuellement)
+  assert(documentTree);
+
   console.log('good');
 
   throw 77777;
