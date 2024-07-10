@@ -52,6 +52,11 @@ export function cleanFigmaDefects(figmaNode: GetFileResponse) {
     }
   }
 
+  //
+  // TODO: see forum, maybe it's just for deleted components, what to do? adjust comments?
+  // TODO: we could use a component and put inside what we got from "nodes?ids=..." but it's maybe complicated for no reason
+  //
+
   if (emulatedFigmaComponentsIds.length > 0) {
     console.warn(
       `Figma has sent ${emulatedFigmaComponentsIds.length} local components defects, we emulated them as remote components for the ease of usage: [${emulatedFigmaComponentsIds.join(', ')}]`
