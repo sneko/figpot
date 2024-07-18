@@ -11,7 +11,7 @@ describe('streamToJson()', () => {
     const dataObject = withRectangeFigmaTree as GetFileResponse;
     const dataString = JSON.stringify(dataObject);
 
-    const dataStream = new Readable();
+    const dataStream = new Readable({ read() {} });
 
     // streamJson.parser();
 
@@ -23,6 +23,8 @@ describe('streamToJson()', () => {
     });
 
     // dataStream
+
+    // dataStream.push(Buffer.from(dataString, 'utf-8'));
 
     //
     //
@@ -45,7 +47,19 @@ describe('streamToJson()', () => {
     //
     //
 
-    bfj;
+    await new Promise<void>((resolve, reject) => {
+      bfj
+        .parse(dataStream)
+        .then((parsedObject: any) => {
+          expect(parsedObject).toMatchObject(dataObject);
+
+          resolve();
+        })
+        .catch(reject);
+
+      dataStream.push(Buffer.from(dataString, 'utf-8'));
+      dataStream.push(null);
+    });
 
     // await new Promise<void>((resolve, reject) => {
     //   dataStream
