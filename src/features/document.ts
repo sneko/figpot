@@ -284,22 +284,23 @@ export async function retrieve(options: RetrieveOptionsType) {
     // Get all predefined colors from Figma
     // We do not use `getPublishedVariables()` because it contains only a part of the local ones, and without values
     // Note: other variable kinds are not retrieved because Penpot cannot manage them (so using their raw value)
-    const figmaColors = await retrieveColors(document.figmaDocument);
+    const figmaColors: FigmaDefinedColor[] = [];
+    // const figmaColors = await retrieveColors(document.figmaDocument);
 
-    const customPenpotFontsVariants = (await postCommandGetFontVariants({
-      requestBody: {
-        fileId: document.penpotDocument,
-      },
-    })) as unknown as any[];
+    // const customPenpotFontsVariants = (await postCommandGetFontVariants({
+    //   requestBody: {
+    //     fileId: document.penpotDocument,
+    //   },
+    // })) as unknown as any[];
 
     const mapping = await restoreMapping(document.figmaDocument, document.penpotDocument);
 
-    for (const customPenpotFontVariant of customPenpotFontsVariants) {
-      const simulatedFigmaFontVariantId = `${customPenpotFontVariant.fontFamily}-${customPenpotFontVariant.fontStyle}-${customPenpotFontVariant.fontWeight}`;
-      const penpotFontId = customPenpotFontVariant.fontId;
+    // for (const customPenpotFontVariant of customPenpotFontsVariants) {
+    //   const simulatedFigmaFontVariantId = `${customPenpotFontVariant.fontFamily}-${customPenpotFontVariant.fontStyle}-${customPenpotFontVariant.fontWeight}`;
+    //   const penpotFontId = customPenpotFontVariant.fontId;
 
-      registerFontId(simulatedFigmaFontVariantId, penpotFontId, mapping);
-    }
+    //   registerFontId(simulatedFigmaFontVariantId, penpotFontId, mapping);
+    // }
 
     await saveMapping(document.figmaDocument, document.penpotDocument, mapping);
 

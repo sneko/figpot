@@ -184,8 +184,8 @@ export function extractStylesTypographies(documentTree: GetFileResponse, stylesN
 export async function retrieveDocument(documentId: string) {
   const documentTree = await getFile({
     fileKey: documentId,
-    // geometry: 'paths', // Needed to have all properties into nodes
-    geometry: undefined, // Needed to have all properties into nodes
+    geometry: 'paths', // Needed to have all properties into nodes
+    // geometry: undefined, // Needed to have all properties into nodes
   });
 
   // Error: Cannot create a string longer than 0x1fffffe8 characters
@@ -215,8 +215,19 @@ export async function retrieveDocument(documentId: string) {
   // it returns normally whereas an error "ERR_STRING_TOO_LONG" has been returned... we should check documentTree ... and find a proper way to look at code (using custom client?)
   // TODO: s'entraîner d'abord sans "paths" vu que ça bug déjà ... gain de temps
   // TODO: par la suite... p-e simplifier les SVG pour pas flinguer la UI. Ou alors ne pas les mettre tout simplement quand leur taille dépasse une certaine longueur (vu que la conversion est approximative actuellement)
+
+  // For
   assert(documentTree);
 
+  console.log(typeof documentTree);
+  // console.log(documentTree);
+
+  //
+  // https://forum.figma.com/t/get-a-less-verbose-format-from-api-than-raw-json/79176
+  //
+
+  console.log(11111);
+  // console.log(documentTree);
   console.log('good');
 
   throw 77777;
