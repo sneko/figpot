@@ -1,3 +1,4 @@
+import bfj from 'bfj';
 import { Readable } from 'stream';
 import streamJson from 'stream-json';
 import streamJsonValues from 'stream-json/streamers/StreamValues';
@@ -44,41 +45,43 @@ describe('streamToJson()', () => {
     //
     //
 
-    await new Promise<void>((resolve, reject) => {
-      dataStream
-        .pipe(jsonParser)
-        // Uncomment one of the following lines based on your need to filter, pick, or ignore parts of the JSON
-        // .pipe(jsonFilter)
-        // .pipe(jsonPick)
-        // .pipe(jsonIgnore)
-        // .pipe(streamJsonValues.streamValues({}))
-        .on('data', (data) => {
-          console.log('-----');
-          console.log(data);
-          // if (data.name === 'keyValue') {
-          //   console.log('Key:', data.key);
-          //   console.log('Value:', data.value);
-          // }
-        })
-        .on('end', () => {
-          console.log('Finished processing JSON file');
+    bfj;
 
-          resolve();
-        })
-        .on('error', (error) => {
-          console.error('Error processing JSON file:', error);
+    // await new Promise<void>((resolve, reject) => {
+    //   dataStream
+    //     .pipe(jsonParser)
+    //     // Uncomment one of the following lines based on your need to filter, pick, or ignore parts of the JSON
+    //     // .pipe(jsonFilter)
+    //     // .pipe(jsonPick)
+    //     // .pipe(jsonIgnore)
+    //     // .pipe(streamJsonValues.streamValues({}))
+    //     .on('data', (data) => {
+    //       console.log('-----');
+    //       console.log(data);
+    //       // if (data.name === 'keyValue') {
+    //       //   console.log('Key:', data.key);
+    //       //   console.log('Value:', data.value);
+    //       // }
+    //     })
+    //     .on('end', () => {
+    //       console.log('Finished processing JSON file');
 
-          reject();
-        });
+    //       resolve();
+    //     })
+    //     .on('error', (error) => {
+    //       console.error('Error processing JSON file:', error);
 
-      dataStream.push(Buffer.from(dataString, 'utf-8'));
+    //       reject();
+    //     });
 
-      // // TODO: convert
-      // JSON.parse();
+    //   dataStream.push(Buffer.from(dataString, 'utf-8'));
 
-      // const stream = fs.createReadStream('path/to/your/large.json');
+    //   // // TODO: convert
+    //   // JSON.parse();
 
-      // expect(diffResult.get(2)?.state).toBe('updated');
-    });
+    //   // const stream = fs.createReadStream('path/to/your/large.json');
+
+    //   // expect(diffResult.get(2)?.state).toBe('updated');
+    // });
   });
 });
