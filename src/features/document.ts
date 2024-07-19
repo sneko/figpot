@@ -14,7 +14,7 @@ import { toFile } from 'ts-graphviz/adapter';
 import { z } from 'zod';
 
 import { GetFileResponse, getImageFills } from '@figpot/src/clients/figma';
-import { OpenAPI as PenpotClientSettings, postCommandGetFontVariants } from '@figpot/src/clients/penpot';
+import { OpenAPI as PenpotClientSettings, postCommandGetFontVariants, postCommandGetPage } from '@figpot/src/clients/penpot';
 import {
   PostCommandGetFileResponse,
   appCommonFilesChanges$change,
@@ -319,7 +319,12 @@ export async function retrieve(options: RetrieveOptionsType) {
     const documentFolderPath = getFigmaDocumentPath(document.figmaDocument);
     await fs.mkdir(documentFolderPath, { recursive: true });
 
+    // TODO:
+    // TODO:
+    // TODO: write the top document, and all pages trees
+    // TODO:
     await fs.writeFile(getFigmaDocumentTreePath(document.figmaDocument), JSON.stringify(documentTree, null, 2));
+    // for ...
     await fs.writeFile(getFigmaDocumentColorsPath(document.figmaDocument), JSON.stringify(figmaColors, null, 2));
     await fs.writeFile(getFigmaDocumentTypographiesPath(document.figmaDocument), JSON.stringify(figmaTypographies, null, 2));
 
@@ -379,6 +384,11 @@ export async function transform(options: TransformOptionsType) {
   // Go from the Figma format to the Penpot one
   for (const document of options.documents) {
     const figmaTree = await readFigmaTreeFile(document.figmaDocument);
+    // TODO:
+    // TODO:
+    // TODO: get all pages also, but one by one with the transform so the memory does not explode
+    // TODO:
+    // TODO:
     const figmaColors = await readFigmaColorsFile(document.figmaDocument);
     const figmaTypographies = await readFigmaTypographiesFile(document.figmaDocument);
 
@@ -386,6 +396,11 @@ export async function transform(options: TransformOptionsType) {
 
     const mapping = await restoreMapping(document.figmaDocument, document.penpotDocument);
 
+    // TODO:
+    // TODO:
+    // TODO: use a transform for global metadata, and one for each page?
+    // TODO: not a big deal if it reuses the same structure?
+    // TODO:
     const penpotTree = transformDocument(figmaTree, figmaColors, figmaTypographies, mapping);
 
     // Save mapping for later usage
@@ -533,7 +548,6 @@ export function performBasicNodeCreation(
   };
 
   pushOperationsWithOrderingLogic(normalOperations, delayedOperations, delayedForChildrenOperations, operation);
-
 
   if (componentId) {
     delayBindingOperation(delayedOperations, id, _pageId, componentId, componentFile, componentRoot, mainInstance, shapeRef);
@@ -1043,11 +1057,28 @@ export async function compare(options: CompareOptionsType) {
       );
     }
 
+    //
+    //
+    // TODO: this should loop over each page...
+    // can we reproduce the exact same logic of comparaison?
+    // if getting the page not includes props like "components/typographies" we would have to either
+    // - try to use get-file-fragment to see if that's instead
+    // - or patch "get-file" to allow returning top components
+    // ---
+    //
+    // let hostedPageDocument = await postCommandGetPage({
+    //   requestBody: {
+    //     fileId: document.penpotDocument,
+    //     pageId: xxx,
+    //   }
+    // });
     let hostedDocument = await postCommandGetFile({
       requestBody: {
         id: document.penpotDocument,
       },
     });
+
+    // hostedDocument.
 
     // TODO: for now the response is kebab-case despite types, so forcing the conversion (ref: https://github.com/penpot/penpot/pull/4760#pullrequestreview-2125984653)
     hostedDocument = camelCase(hostedDocument, Number.MAX_SAFE_INTEGER) as PostCommandGetFileResponse;

@@ -182,14 +182,44 @@ export function extractStylesTypographies(documentTree: GetFileResponse, stylesN
 }
 
 export async function retrieveDocument(documentId: string) {
-  const documentTree = await getFile({
+  // Note: we split retrieving the document per page because in case of huge document the JSON cannot be parsed (over 500MB of stringified JSON) and/or cannot fit into memory (using stream is not an ideal solution since we compare the 2 states (both need to be in memory))
+  const topDocumentTree = await getFile({
     fileKey: documentId,
-    geometry: 'paths', // Needed to have all properties into nodes
+    depth: 1,
   });
+
+  // TODO: if last modified not recent compared to the last sync, skip except if forced
+
+  const pagesTrees: any[] = [];
+
+  for (const pageNode of topDocumentTree.document.children) {
+    // The following will have the same format except loading only a specific page children
+    const pageDocumentTree = await getFile({
+      fileKey: documentId,
+      ids: pageNode.id,
+      geometry: 'paths', // Needed to have all properties into nodes
+    });
+
+    assert(pageDocumentTree.document.children.length === 1);
+
+    pagesTrees.push(pageDocumentTree.document.children[0]);
+
+    // We merge the wanted properties needed at document-scope
+    // Note: those overriden are not a problem since they should be the same
+    Object.assign(topDocumentTree.componentSets, pageDocumentTree.componentSets);
+    Object.assign(topDocumentTree.components, pageDocumentTree.components);
+    Object.assign(topDocumentTree.styles, pageDocumentTree.styles);
+  }
 
   // TODO: return the metadata
 
-  return documentTree;
+  //
+  //
+  // TODO: to test with a simple document with almost empty pages
+  //
+  //
+
+  return topDocumentTree;
 }
 
 export async function retrieveDocumentsFromInput(): Promise<string[]> {
