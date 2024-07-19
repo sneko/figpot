@@ -38,6 +38,7 @@
   "dependencies": {
     "@commander-js/extra-typings": "^11.1.0",
     "@inquirer/prompts": "^3.3.0",
+    "@streamparser/json-node": "^0.0.21",
     "@types/graphlib": "^2.1.12",
     "bfj": "^8.0.0",
     "chalk": "^5.3.0",

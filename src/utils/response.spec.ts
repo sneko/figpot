@@ -54,6 +54,35 @@ describe('streamToJson()', () => {
     //
     //
 
+    // await new Promise<void>((resolve, reject) => {
+    //   bfj
+    //     .parse(dataStream)
+    //     .then((parsedObject: any) => {
+    //       expect(parsedObject).toMatchObject(dataObject);
+
+    //       resolve();
+    //     })
+    //     .catch(reject);
+
+    //   dataStream.push(Buffer.from(dataString, 'utf-8'));
+    //   dataStream.push(null);
+
+    //   // if using stream-json
+    //   // https://github.com/davidfou/stream-json-object/blob/main/src/streamObjectTransformer.mjs
+    //   //
+    //   //
+    //   //
+    //   // https://github.com/uhop/stream-json/issues/137
+    //   //
+    //   //
+    //   // https://github.com/auth70/bodyguard ???
+    //   // https://www.npmjs.com/package/@streamparser/json-node ??? https://www.npmjs.com/package/@streamparser/json ???
+    //   //
+    //   //
+    //   // https://stackoverflow.com/questions/68230031/cannot-create-a-string-longer-than-0x1fffffe8-characters-in-json-parse
+    //   // recommende BFJ ...
+    // });
+
     await new Promise<void>((resolve, reject) => {
       bfj
         .parse(dataStream)
@@ -66,22 +95,21 @@ describe('streamToJson()', () => {
 
       dataStream.push(Buffer.from(dataString, 'utf-8'));
       dataStream.push(null);
-
-      // if using stream-json
-      // https://github.com/davidfou/stream-json-object/blob/main/src/streamObjectTransformer.mjs
-      //
-      //
-      //
-      // https://github.com/uhop/stream-json/issues/137
-      //
-      //
-      // https://github.com/auth70/bodyguard ???
-      // https://www.npmjs.com/package/@streamparser/json-node ??? https://www.npmjs.com/package/@streamparser/json ???
-      //
-      //
-      // https://stackoverflow.com/questions/68230031/cannot-create-a-string-longer-than-0x1fffffe8-characters-in-json-parse
-      // recommende BFJ ...
     });
+
+    // await new Promise<void>((resolve, reject) => {
+    //   bfj
+    //     .parse(dataStream)
+    //     .then((parsedObject: any) => {
+    //       expect(parsedObject).toMatchObject(dataObject);
+
+    //       resolve();
+    //     })
+    //     .catch(reject);
+
+    //   dataStream.push(Buffer.from(dataString, 'utf-8'));
+    //   dataStream.push(null);
+    // });
 
     // await new Promise<void>((resolve, reject) => {
     //   dataStream
