@@ -46,6 +46,13 @@ describe('streamToJson()', () => {
     // dans tous les cas il faut avoir response.body.getReader()
     //
     //
+    //
+    // do it for read/write for Figma and Penpot files
+    //
+    //
+    // MAKE SURE to pass objects across steps to avoid write/read load for huge files (? maybe not priority since each not used across 2+ steps?)
+    //
+    //
 
     await new Promise<void>((resolve, reject) => {
       bfj
@@ -59,6 +66,21 @@ describe('streamToJson()', () => {
 
       dataStream.push(Buffer.from(dataString, 'utf-8'));
       dataStream.push(null);
+
+      // if using stream-json
+      // https://github.com/davidfou/stream-json-object/blob/main/src/streamObjectTransformer.mjs
+      //
+      //
+      //
+      // https://github.com/uhop/stream-json/issues/137
+      //
+      //
+      // https://github.com/auth70/bodyguard ???
+      // https://www.npmjs.com/package/@streamparser/json-node ??? https://www.npmjs.com/package/@streamparser/json ???
+      //
+      //
+      // https://stackoverflow.com/questions/68230031/cannot-create-a-string-longer-than-0x1fffffe8-characters-in-json-parse
+      // recommende BFJ ...
     });
 
     // await new Promise<void>((resolve, reject) => {

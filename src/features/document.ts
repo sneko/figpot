@@ -1156,6 +1156,8 @@ export async function processDifferences(figmaDocumentId: string, penpotDocument
       formData.append('is-local', 'false');
       formData.append('content', blob);
 
+      // fsSync.createReadStream();
+
       console.log(`uploading the media ${penpotMediaId} to Penpot`);
 
       const response = await fetch(`${PenpotClientSettings.BASE}/command/upload-file-media-object`, {
