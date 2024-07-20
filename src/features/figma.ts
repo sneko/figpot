@@ -1,5 +1,8 @@
 import { checkbox, input, select } from '@inquirer/prompts';
 import assert from 'assert';
+import fsSync from 'fs';
+import { pipeline } from 'stream/promises';
+import { ReadableStream } from 'stream/web';
 
 import {
   ErrorResponsePayloadWithErrorBoolean,
@@ -182,6 +185,16 @@ export function extractStylesTypographies(documentTree: GetFileResponse, stylesN
 }
 
 export async function retrieveDocument(documentId: string) {
+  const documentTreeStream = (await getFile({
+    fileKey: documentId,
+    geometry: 'paths', // Needed to have all properties into nodes
+    // geometry: undefined, // Needed to have all properties into nodes
+  })) as unknown as ReadableStream;
+
+  await pipeline(documentTreeStream, fsSync.createWriteStream('/Users/sneko/Documents/beta.gouv.fr/repos/figpot/test.json'));
+
+  throw 444;
+
   // Note: we split retrieving the document per page because in case of huge document the JSON cannot be parsed (over 500MB of stringified JSON) and/or cannot fit into memory (using stream is not an ideal solution since we compare the 2 states (both need to be in memory))
   const topDocumentTree = await getFile({
     fileKey: documentId,
