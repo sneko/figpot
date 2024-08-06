@@ -120,7 +120,7 @@
   },
   "release": {
     "branches": [
-      "main"
+      "original-main"
     ]
   }
 }
