@@ -2,8 +2,8 @@ name: Continuous Integration
 on:
   push:
     branches:
-      - main
-      - dev
+      - original-main
+      - original-dev
   pull_request:
 env:
   APP_NAME: figpot
@@ -70,7 +70,7 @@ jobs:
         run: npm run build
 
       - name: Release package
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/original-main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
